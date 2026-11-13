@@ -1,910 +1,1243 @@
 # Angular21Tutorial
 
+# Angular 21 – Complete Guide to Component Styling and Global Styling
 
-# Angular 21: Working with Signals in Input Fields
+Angular provides several ways to apply CSS to an application. The most important distinction is between component-level styling and global styling.
 
-Angular Signals provide a reactive way to manage input values without relying on traditional two-way binding with `[(ngModel)]`.
+In Angular 21, you can use:
 
-In Angular 21, you can use the `signal()` function to:
-
-- Store an input field's value.
-- Get the current input value.
-- Update the input value programmatically.
-- Reset the input field using a button.
-- Maintain proper TypeScript types.
-- React to changes in the input value.
+- Component-specific CSS files.
+- Global CSS files.
+- Inline CSS styles.
+- Multiple stylesheets in a component.
+- CSS preprocessors such as SCSS and LESS.
+- Angular's view encapsulation to control how styles affect components.
 
 Let's understand each concept with practical examples.
 
-## 1. How to create a signal for an input field
+## 1. What is component-level styling in Angular?
 
-First, import `signal` from `@angular/core`.
+Component-level styling means writing CSS specifically for an individual Angular component.
 
-app.ts
-
-typescript
-
-```typescript
-import { Component, signal } from '@angular/core';
-
-@Component({
-  selector: 'app-root',
-  standalone: true,
-  templateUrl: './app.html'
-})
-export class AppComponent {
-
-  name = signal<string>('');
-
-}
-```
-
-Here:
-
-- `signal()` creates a reactive value.
-- `string` specifies the TypeScript type.
-- `''` is the initial value.
-
-app.html
-
-HTMLWrap linesCopy codePreview
-
-```html
-<input
-  type="text"
-  [value]="name()"
-  (input)="name.set($any($event.target).value)"
-/>
-
-<p>Name: {{ name() }}</p>
-```
-
-How it works:
-
-- `[value]="name()"` displays the signal's current value.
-- `(input)` listens for changes in the input field.
-- `name.set()` updates the signal.
-- `{{ name() }}` displays the latest value.
-
-Important To read a signal, call it using parentheses: `name()`.
-
-## 2. How to get input value using signals
-
-You can access the current signal value by calling the signal as a function.
-
-typescript
-
-```typescript
-name = signal<string>('');
-
-getName() {
-  console.log(this.name());
-}
-```
-
-For example, if the user enters `John`, then:
-
-typescript
-
-```typescript
-console.log(this.name());
-```
-
-Output:
+For example, suppose you have these components:
 
 text
 
 ```text
-John
+src/
+  app/
+    home/
+      home.component.ts
+      home.component.html
+      home.component.css
+
+    login/
+      login.component.ts
+      login.component.html
+      login.component.css
+
+    dashboard/
+      dashboard.component.ts
+      dashboard.component.html
+      dashboard.component.css
 ```
 
-You can also use the signal value inside other methods.
+Each component has its own CSS file.
+
+home.component.css
+
+css
+
+```css
+h1 {
+  color: blue;
+}
+
+.home-container {
+  background-color: lightblue;
+  padding: 20px;
+}
+```
+
+login.component.css
+
+css
+
+```css
+h1 {
+  color: red;
+}
+
+.login-container {
+  background-color: lightyellow;
+  padding: 20px;
+}
+```
+
+home.component.ts
 
 typescript
 
 ```typescript
-submit() {
-  const inputValue = this.name();
+import { Component } from '@angular/core';
 
-  console.log('Input Value:', inputValue);
-}
+@Component({
+  selector: 'app-home',
+  standalone: true,
+  templateUrl: './home.component.html',
+  styleUrl: './home.component.css'
+})
+export class HomeComponent {}
 ```
 
-## 3. How to set input value using signals
+home.component.html
 
-Use the `.set()` method to update the signal value.
+HTMLWrap linesCopy codePreview
+
+```html
+<div class="home-container">
+  <h1>Home Page</h1>
+</div>
+```
+
+login.component.ts
 
 typescript
 
 ```typescript
-name = signal<string>('');
+import { Component } from '@angular/core';
 
-updateName() {
-  this.name.set('Angular Developer');
+@Component({
+  selector: 'app-login',
+  standalone: true,
+  templateUrl: './login.component.html',
+  styleUrl: './login.component.css'
+})
+export class LoginComponent {}
+```
+
+### What happens here?
+
+- Home component uses its own CSS.
+- Login component uses its own CSS.
+- The `h1` in Home is blue.
+- The `h1` in Login is red.
+- The CSS from one component normally does not affect another component.
+
+This is possible because Angular uses `ViewEncapsulation.Emulated` by default.
+
+When should you use component-level styling?
+
+Use it when:
+
+- Styling buttons, forms, cards, tables, etc., that belong to a particular component.
+- Building reusable components.
+- Developing large applications with multiple developers.
+- Keeping CSS maintainable and organized.
+
+## 2. What is global styling in Angular?
+
+Global styling means writing CSS that can apply throughout the entire Angular application.
+
+Instead of creating CSS separately for every component, you define common styles in global CSS files.
+
+Angular CLI projects normally have a global stylesheet:
+
+text
+
+```text
+src/
+  styles.css
+```
+
+You can define common styles there.
+
+styles.css
+
+css
+
+```css
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+}
+
+h1 {
+  color: green;
+}
+
+button {
+  padding: 10px 20px;
+  background-color: blue;
+  color: white;
+}
+
+.container {
+  width: 90%;
+  margin: auto;
 }
 ```
 
-When you call `this.name.set()`, Angular updates the signal and refreshes the dependent template.
+Now these styles can affect matching elements throughout your Angular application.
+
+For example:
+
+home.component.html
+
+HTMLWrap linesCopy codePreview
+
+```html
+<h1>Home Page</h1>
+
+<div class="container">
+  Welcome to Home
+</div>
+
+<button>Submit</button>
+```
+
+login.component.html
+
+HTMLWrap linesCopy codePreview
+
+```html
+<h1>Login Page</h1>
+
+<div class="container">
+  Login Form
+</div>
+
+<button>Login</button>
+```
+
+Both components can use the styles defined in `styles.css`.
+
+### When should you use global styling?
+
+Use global CSS for:
+
+- Common fonts and typography.
+- Application-wide colors.
+- CSS resets.
+- Body and HTML styling.
+- Common button styles.
+- Common utility classes.
+- Theme variables.
+- Third-party library styles.
+
+For example, if your entire application uses the same primary color, define it globally:
+
+css
+
+```css
+:root {
+  --primary-color: #1976d2;
+  --secondary-color: #424242;
+  --background-color: #f5f5f5;
+}
+
+body {
+  background-color: var(--background-color);
+}
+
+.primary-button {
+  background-color: var(--primary-color);
+}
+```
+
+Now multiple components can use the same CSS variables.
+
+## 3. Difference between component styles and global styles
+
+| Feature | Component styles | Global styles |
+| --- | --- | --- |
+| Scope | Normally limited to one component | Application-wide |
+| Location | Component CSS file | `src/styles.css` or another global file |
+| Reusability | Specific to component | Shared across components |
+| Encapsulation | Usually Emulated | Not encapsulated |
+| Maintenance | Managed per component | Managed centrally |
+| Best use | Component-specific UI | Common application design |
+| Example | Login form styling | Common fonts and colors |
+
+### Visual understanding
+
+Global CSS
+
+Entire Angular application
+
+Home
+
+Global CSS
+
+Login
+
+Global CSS
+
+Dashboard
+
+Global CSS
+
+Component CSS
+
+Home CSS
+
+Home only
+
+Login CSS
+
+Login only
+
+Dashboard CSS
+
+Dashboard only
+
+Important: Global styles can still affect elements inside components using Angular's default Emulated encapsulation. Component encapsulation prevents component CSS from leaking out; it does not prevent global CSS from entering.
+
+## 4. Inline styles vs internal styles vs external styles
+
+These are three common ways of writing CSS.
+
+### A. Inline styles
+
+Inline styles mean writing CSS directly inside an HTML element using the `style` attribute.
+
+Example:
+
+HTMLWrap linesCopy codePreview
+
+```html
+<h1 style="color: red; font-size: 30px;">
+  Welcome to Angular
+</h1>
+
+<button style="background-color: blue; color: white;">
+  Submit
+</button>
+```
+
+You can also use Angular style bindings:
+
+HTMLWrap linesCopy codePreview
+
+```html
+<h1 [style.color]="headingColor">
+  Welcome
+</h1>
+
+<div [style.background-color]="backgroundColor">
+  Angular Content
+</div>
+```
+
+Advantages:
+
+- Easy to apply quick styling.
+- Useful for dynamic styles.
+- No separate CSS file required.
+
+Disadvantages:
+
+- Difficult to maintain when used extensively.
+- Can make HTML complicated.
+- Not suitable for reusable styling.
+
+Use inline styles for dynamic values or very small styling requirements.
+
+### B. Internal styles
+
+Internal styles mean writing CSS inside the component's `@Component` decorator using the `styles` property.
+
+Example:
+
+typescript
+
+```typescript
+import { Component } from '@angular/core';
+
+@Component({
+  selector: 'app-home',
+  standalone: true,
+  template: `
+    <h1>Welcome Home</h1>
+    <button>Submit</button>
+  `,
+  styles: `
+    h1 {
+      color: blue;
+    }
+
+    button {
+      background-color: green;
+      color: white;
+      padding: 10px;
+    }
+  `
+})
+export class HomeComponent {}
+```
+
+Here, CSS is written inside the TypeScript file.
+
+Advantages:
+
+- No separate CSS file required.
+- Useful for small components.
+- Styles are associated with the component.
+
+Disadvantages:
+
+- TypeScript files become lengthy.
+- Difficult to maintain large stylesheets.
+- HTML, TypeScript and CSS concerns become mixed.
+
+Use internal styles for small components with very few CSS rules.
+
+### C. External styles
+
+External styles mean writing CSS in a separate `.css` or `.scss` file and connecting it to the component.
+
+Example:
+
+home.component.css
+
+css
+
+```css
+h1 {
+  color: blue;
+}
+
+button {
+  background-color: green;
+  color: white;
+  padding: 10px;
+}
+```
+
+home.component.ts
+
+typescript
+
+```typescript
+import { Component } from '@angular/core';
+
+@Component({
+  selector: 'app-home',
+  standalone: true,
+  templateUrl: './home.component.html',
+  styleUrl: './home.component.css'
+})
+export class HomeComponent {}
+```
+
+This is generally the recommended approach for medium and large components.
+
+### Comparison
+
+| Feature | Inline | Internal | External |
+| --- | --- | --- | --- |
+| Location | HTML element | TypeScript decorator | CSS file |
+| Syntax | `style=""` | `styles` | `styleUrl` |
+| Maintenance | Difficult | Moderate | Easy |
+| Reusability | Low | Low | Better organization |
+| Dynamic styling | Excellent with bindings | Not directly dynamic | Can use CSS variables and bindings |
+| Best use | Dynamic values | Small components | Most components |
+
+## 5. How to create and use multiple global CSS files
+
+Suppose you have a large Angular 21 application.
+
+You may want to separate global CSS into multiple files instead of maintaining everything inside `styles.css`.
+
+For example:
+
+text
+
+```text
+src/
+│
+├── app/
+│   ├── home/
+│   ├── login/
+│   └── dashboard/
+│
+├── styles/
+│   ├── reset.css
+│   ├── typography.css
+│   ├── variables.css
+│   ├── buttons.css
+│   ├── forms.css
+│   └── layout.css
+│
+└── styles.css
+```
+
+### Step 1: Create multiple CSS files
+
+reset.css
+
+css
+
+```css
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+```
+
+variables.css
+
+css
+
+```css
+:root {
+  --primary-color: #1976d2;
+  --secondary-color: #424242;
+  --font-size: 16px;
+}
+```
+
+typography.css
+
+css
+
+```css
+body {
+  font-family: Arial, sans-serif;
+  font-size: var(--font-size);
+}
+
+h1 {
+  font-size: 30px;
+}
+```
+
+buttons.css
+
+css
+
+```css
+.btn-primary {
+  background-color: var(--primary-color);
+  color: white;
+  padding: 10px 20px;
+  border: none;
+}
+```
+
+### Step 2: Register multiple CSS files in angular.json
+
+Open `angular.json`.
+
+Find the build configuration and its `styles` array.
+
+Example:
+
+json
+
+```json
+{
+  "projects": {
+    "my-app": {
+      "architect": {
+        "build": {
+          "options": {
+            "styles": [
+              "src/styles/reset.css",
+              "src/styles/variables.css",
+              "src/styles/typography.css",
+              "src/styles/buttons.css",
+              "src/styles.css"
+            ]
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+The important part is:
+
+json
+
+```json
+"styles": [
+  "src/styles/reset.css",
+  "src/styles/variables.css",
+  "src/styles/typography.css",
+  "src/styles/buttons.css",
+  "src/styles.css"
+]
+```
+
+What happens?
+
+Angular includes all these files in the application's global styling bundle.
+
+You can now use their CSS classes in any component.
 
 For example:
 
 HTMLWrap linesCopy codePreview
 
 ```html
-<input
-  type="text"
-  [value]="name()"
-  (input)="name.set($any($event.target).value)"
-/>
+<h1>Angular 21</h1>
 
-<button (click)="updateName()">
-  Set Name
+<button class="btn-primary">
+  Submit
 </button>
-
-<p>{{ name() }}</p>
 ```
 
-When you click Set Name, the input field displays `Angular Developer`.
+You don't need to import these CSS files separately into every component.
 
-You can also use `.update()` when the new value depends on the previous value.
+Important: CSS loading order matters. If two files define the same selector with equal specificity, the later applicable declaration generally wins.
 
-typescript
+### Alternative: Import multiple CSS files inside styles.css
 
-```typescript
-count = signal<number>(0);
+Instead of listing every file in `angular.json`, you can use CSS `@import`.
 
-increment() {
-  this.count.update(value => value + 1);
+styles.css
+
+css
+
+```css
+@import './styles/reset.css';
+@import './styles/variables.css';
+@import './styles/typography.css';
+@import './styles/buttons.css';
+@import './styles/layout.css';
+```
+
+Then configure only:
+
+json
+
+```json
+"styles": [
+  "src/styles.css"
+]
+```
+
+Both approaches work. For larger applications, explicitly registering global styles in `angular.json` makes the application entry points easier to understand.
+
+## 6. How to load multiple CSS files inside a single component
+
+Angular 21 supports multiple component stylesheets.
+
+There are two ways to do this.
+
+### Method 1: Using styleUrls
+
+Suppose your component has two CSS files:
+
+text
+
+```text
+dashboard/
+  dashboard.component.ts
+  dashboard.component.html
+  dashboard.component.css
+  dashboard-responsive.css
+```
+
+dashboard.component.css
+
+css
+
+```css
+.dashboard {
+  background-color: lightblue;
+  padding: 20px;
 }
 ```
 
-## 4. How to reset input value with a button
+dashboard-responsive.css
 
-To reset an input field, simply set the signal back to its initial value.
+css
 
-app.ts
+```css
+@media (max-width: 768px) {
+  .dashboard {
+    padding: 10px;
+  }
+}
+```
+
+Now load both files inside the component.
+
+dashboard.component.ts
 
 typescript
 
 ```typescript
-import { Component, signal } from '@angular/core';
+import { Component } from '@angular/core';
 
 @Component({
-  selector: 'app-root',
+  selector: 'app-dashboard',
   standalone: true,
-  templateUrl: './app.html'
+  templateUrl: './dashboard.component.html',
+
+  styleUrls: [
+    './dashboard.component.css',
+    './dashboard-responsive.css'
+  ]
 })
-export class AppComponent {
-
-  name = signal<string>('');
-
-  resetName() {
-    this.name.set('');
-  }
-
-}
+export class DashboardComponent {}
 ```
 
-app.html
+Both CSS files are associated with the Dashboard component.
 
-HTMLWrap linesCopy codePreview
+### Method 2: Using styleUrl and styles
 
-```html
-<h2>Angular Signals Example</h2>
-
-<input
-  type="text"
-  [value]="name()"
-  (input)="name.set($any($event.target).value)"
-  placeholder="Enter your name"
-/>
-
-<button (click)="resetName()">
-  Reset
-</button>
-
-<p>Entered Name: {{ name() }}</p>
-```
-
-Expected behavior:
-
-1. User enters `John`.
-2. The signal stores `John`.
-3. The paragraph displays `John`.
-4. User clicks Reset.
-5. The signal becomes an empty string.
-6. The input field and paragraph both become empty.
-
-Key concept You don't need to manually clear the HTML input. Updating the signal automatically updates the input because it is bound using `[value]="name()"`.
-
-## 5. Common mistakes developers make while using signals
-
-Here are some mistakes to avoid when working with Angular Signals.
-
-### Mistake 1: Forgetting parentheses when reading a signal
-
-Incorrect:
+You can also combine an external stylesheet with internal styles.
 
 typescript
 
 ```typescript
-console.log(this.name);
+@Component({
+  selector: 'app-dashboard',
+  standalone: true,
+  templateUrl: './dashboard.component.html',
+
+  styleUrl: './dashboard.component.css',
+
+  styles: `
+    h1 {
+      color: blue;
+    }
+
+    button {
+      padding: 10px;
+    }
+  `
+})
+export class DashboardComponent {}
 ```
 
-Correct:
+### Difference between styleUrl, styleUrls and styles
 
-typescript
-
-```typescript
-console.log(this.name());
-```
-
-Why?
-
-A signal is a getter function. Calling it returns its current value.
-
-### Mistake 2: Assigning a value directly to a signal
-
-Incorrect:
-
-typescript
-
-```typescript
-this.name = 'John';
-```
-
-Correct:
-
-typescript
-
-```typescript
-this.name.set('John');
-```
-
-Why?
-
-You must use `.set()` to replace a signal's value.
-
-### Mistake 3: Using `.set()` incorrectly
-
-Incorrect:
-
-typescript
-
-```typescript
-this.name('John');
-```
-
-Correct:
-
-typescript
-
-```typescript
-this.name.set('John');
-```
-
-Why?
-
-Calling a signal without arguments reads its value. Use `.set()` to change it.
-
-### Mistake 4: Forgetting to update the signal when the input changes
-
-Incorrect:
-
-HTMLWrap linesCopy codePreview
-
-```html
-<input type="text" [value]="name()" />
-```
-
-Correct:
-
-HTMLWrap linesCopy codePreview
-
-```html
-<input
-  type="text"
-  [value]="name()"
-  (input)="name.set($any($event.target).value)"
-/>
-```
-
-Why?
-
-The `[value]` binding displays the signal value, but it does not automatically update the signal when the user types.
-
-### Mistake 5: Using `.set()` instead of `.update()` for dependent changes
-
-For example, incrementing a counter.
-
-Incorrect or unnecessarily verbose:
-
-typescript
-
-```typescript
-this.count.set(this.count() + 1);
-```
-
-Better:
-
-typescript
-
-```typescript
-this.count.update(value => value + 1);
-```
-
-Why?
-
-`.update()` receives the previous value and calculates the next value.
-
-### Mistake 6: Modifying objects inside signals directly
-
-Incorrect:
-
-typescript
-
-```typescript
-user = signal({ name: 'John', age: 25 });
-
-this.user().name = 'David';
-```
-
-Correct:
-
-typescript
-
-```typescript
-this.user.update(user => ({
-  ...user,
-  name: 'David'
-}));
-```
-
-Why?
-
-Signals track updates when their values are set or updated. Mutating an object directly does not notify signal consumers.
-
-## 6. Proper typing of signals in Angular
-
-Angular Signals support TypeScript generics.
-
-The syntax is:
-
-typescript
-
-```typescript
-signal<Type>(initialValue);
-```
-
-Here are common examples.
-
-### String signal
-
-typescript
-
-```typescript
-name = signal<string>('');
-```
-
-Used for input fields containing text.
-
-### Number signal
-
-typescript
-
-```typescript
-age = signal<number>(25);
-```
-
-Used for numbers, counters and calculations.
-
-### Boolean signal
-
-typescript
-
-```typescript
-isLoggedIn = signal<boolean>(false);
-```
-
-Used for true/false values.
-
-### Array signal
-
-typescript
-
-```typescript
-users = signal<string[]>([]);
-```
-
-Used for storing arrays of strings.
-
-Updating an array:
-
-typescript
-
-```typescript
-this.users.update(users => [
-  ...users,
-  'John'
-]);
-```
-
-### Object signal
-
-typescript
-
-```typescript
-user = signal<{
-  name: string;
-  age: number;
-}>({
-  name: 'John',
-  age: 25
-});
-```
-
-Updating an object:
-
-typescript
-
-```typescript
-this.user.set({
-  name: 'David',
-  age: 30
-});
-```
-
-### Signal with null values
-
-Sometimes an input or variable may initially have no value.
-
-typescript
-
-```typescript
-selectedUser = signal<string | null>(null);
-```
-
-Later:
-
-typescript
-
-```typescript
-this.selectedUser.set('John');
-```
-
-The `| null` means the signal can contain either a string or `null`.
-
-### Recommended typing practices
-
-| Requirement | Recommended type |
+| Property | Purpose |
 | --- | --- |
-| Text input | `signal<string>('')` |
-| Number input | `signal<number>(0)` |
-| Checkbox | `signal<boolean>(false)` |
-| Array | `signal<string[]>([])` |
-| Object | `signal<User>(initialUser)` |
-| Optional value | `signal<string \\| null>(null)` |
+| `styleUrl` | Loads one external CSS file |
+| `styleUrls` | Loads multiple external CSS files |
+| `styles` | Defines CSS directly inside component metadata |
 
-You can also let TypeScript infer the type:
+Angular 21 supports all three.
+
+My recommendation: Use `styleUrl` for one stylesheet and `styleUrls` when a component genuinely needs multiple external stylesheets. Keep styles grouped logically rather than creating too many small files.
+
+## 7. How Angular style encapsulation works
+
+This is one of the most important Angular styling concepts.
+
+Style encapsulation determines whether a component's CSS can affect other components.
+
+Angular provides four encapsulation modes in Angular 21:
+
+1. `ViewEncapsulation.Emulated`
+2. `ViewEncapsulation.ShadowDom`
+3. `ViewEncapsulation.None`
+4. `ViewEncapsulation.ExperimentalIsolatedShadowDom`
+
+Let's understand them.
+
+### A. ViewEncapsulation.Emulated
+
+Default modeAngular uses Emulated encapsulation by default.
+
+Example:
 
 typescript
 
 ```typescript
-name = signal('');
-age = signal(25);
-isActive = signal(false);
-```
-
-TypeScript automatically infers `string`, `number`, and `boolean`, respectively.
-
-Best practice: Use explicit generic types when working with complex objects, union types, or when you want to make your code easier to understand.
-
-## 7. Complete Angular 21 example
-
-Here is a complete example combining everything we've discussed.
-
-app.ts
-
-typescript
-
-```typescript
-import { Component, signal } from '@angular/core';
-
 @Component({
-  selector: 'app-root',
+  selector: 'app-home',
   standalone: true,
-  templateUrl: './app.html'
+  template: `
+    <h1>Home Page</h1>
+  `,
+  styles: `
+    h1 {
+      color: red;
+    }
+  `
 })
-export class AppComponent {
-
-  // Create signal
-  name = signal<string>('');
-
-  // Get input value
-  getName() {
-    console.log(this.name());
-  }
-
-  // Set input value
-  setName() {
-    this.name.set('Angular Developer');
-  }
-
-  // Reset input value
-  resetName() {
-    this.name.set('');
-  }
-
-}
+export class HomeComponent {}
 ```
 
-app.html
+Angular internally generates special attributes to scope the CSS selectors.
+
+Conceptually, the generated HTML looks like:
 
 HTMLWrap linesCopy codePreview
 
 ```html
-<h2>Angular 21 Signals</h2>
-
-<input
-  type="text"
-  [value]="name()"
-  (input)="name.set($any($event.target).value)"
-  placeholder="Enter your name"
-/>
-
-<br /><br />
-
-<button (click)="getName()">
-  Get Value
-</button>
-
-<button (click)="setName()">
-  Set Value
-</button>
-
-<button (click)="resetName()">
-  Reset Value
-</button>
-
-<h3>Input Value: {{ name() }}</h3>
+<app-home _nghost-ng-c123>
+  <h1 _ngcontent-ng-c123>
+    Home Page
+  </h1>
+</app-home>
 ```
 
-## 8. Best practices for Angular 21 developers
+The generated CSS is conceptually similar to:
 
-A few additional recommendations:
+css
 
-1. Avoid `$any()` where possible. Use a properly typed event handler instead.
-   typescript
-   ```typescript
-   onNameInput(event: Event) {
-     const target = event.target;
-   
-     if (target instanceof HTMLInputElement) {
-       this.name.set(target.value);
-     }
-   }
-   ```
-   Template:
-   HTMLWrap linesCopy codePreview
-   ```html
-   <input
-     [value]="name()"
-     (input)="onNameInput($event)"
-   />
-   ```
-2. Use `computed()` for derived values.
-   typescript
-   ```typescript
-   import { signal, computed } from '@angular/core';
-   
-   firstName = signal('John');
-   lastName = signal('David');
-   
-   fullName = computed(() =>
-     this.firstName() + ' ' + this.lastName()
-   );
-   ```
-3. Don't confuse `signal()` and `input()`.
-   - `signal()` creates a writable signal that your component owns.
-   - `input()` creates a signal-based component input that receives a value from its parent. It is read-only inside the receiving component.
-   Example:
-   typescript
-   ```typescript
-   import { Component, input } from '@angular/core';
-   
-   @Component({
-     selector: 'app-user',
-     template: `<p>{{ name() }}</p>`
-   })
-   export class UserComponent {
-     name = input<string>('');
-   }
-   ```
-4. Use `.set()` to replace values and `.update()` to calculate new values.
-5. Avoid directly mutating objects and arrays stored in signals. Prefer immutable updates.
+```css
+h1[_ngcontent-ng-c123] {
+  color: red;
+}
+```
 
-## 9. Quick revision: Angular Signals methods
+The actual generated attribute names are Angular implementation details.
 
-| Method | Purpose | Example |
+Result:
+
+- Home component CSS affects its own template elements.
+- It does not normally affect another component's template.
+- Global CSS can still affect Home component elements.
+
+### B. ViewEncapsulation.ShadowDom
+
+Angular uses the browser's native Shadow DOM.
+
+Example:
+
+typescript
+
+```typescript
+import {
+  Component,
+  ViewEncapsulation
+} from '@angular/core';
+
+@Component({
+  selector: 'app-home',
+  standalone: true,
+  template: `
+    <h1>Home Page</h1>
+  `,
+  styles: `
+    h1 {
+      color: red;
+    }
+  `,
+  encapsulation: ViewEncapsulation.ShadowDom
+})
+export class HomeComponent {}
+```
+
+Angular creates a Shadow Root for the component.
+
+How to Build a Lightweight Embeddable Widget in Vanilla JS (Under 30KB) - DEV Community
+
+[dev.to](<https://dev.to/alex_boykov/how-to-build-a-lightweight-embeddable-widget-in-vanilla-js-under-30kb-5f4b?utm_source=chatgpt.com>)
+
+Result:
+
+- Component CSS stays inside its Shadow DOM.
+- Internal styles do not affect outside elements.
+- Ordinary global CSS does not cross into the shadow tree.
+- Shadow DOM also changes how events, slots and DOM inspection work.
+
+Use this when you need native browser-level style isolation, especially for independently reusable web components.
+
+### C. ViewEncapsulation.None
+
+This disables Angular's style encapsulation.
+
+Example:
+
+typescript
+
+```typescript
+import {
+  Component,
+  ViewEncapsulation
+} from '@angular/core';
+
+@Component({
+  selector: 'app-home',
+  standalone: true,
+  template: `
+    <h1>Home Page</h1>
+  `,
+  styles: `
+    h1 {
+      color: red;
+    }
+  `,
+  encapsulation: ViewEncapsulation.None
+})
+export class HomeComponent {}
+```
+
+Result:
+
+The CSS behaves like global CSS.
+
+For example, the `h1` rule can affect headings outside the Home component.
+
+Be careful when using this because styles can accidentally affect other components.
+
+### D. ViewEncapsulation.ExperimentalIsolatedShadowDom
+
+Angular 21 also exposes an experimental encapsulation mode.
+
+typescript
+
+```typescript
+encapsulation: ViewEncapsulation.ExperimentalIsolatedShadowDom
+```
+
+It uses Shadow DOM while preventing external global styles from leaking into the component.
+
+This is useful for stronger isolation, but it is experimental. Avoid relying on it for production-critical functionality without evaluating its compatibility and limitations.
+
+### Encapsulation comparison
+
+| Mode | CSS isolation | Global styles enter? |
 | --- | --- | --- |
-| `signal()` | Create signal | `name = signal('')` |
-| `()` | Read value | `name()` |
-| `.set()` | Replace value | `name.set('John')` |
-| `.update()` | Update using previous value | `count.update(v => v + 1)` |
-| `computed()` | Derive reactive value | `fullName = computed(...)` |
-| `input()` | Create component input signal | `name = input('')` |
+| Emulated | Angular-emulated isolation | Yes |
+| ShadowDom | Native Shadow DOM | No, ordinary global CSS |
+| None | No isolation | Yes |
+| ExperimentalIsolatedShadowDom | Strong isolation | No |
 
-## 10. Official Angular documentation
+Angular documentation: [Angular 21 – Styling Components](<https://v21.angular.dev/guide/components/styling?utm_source=chatgpt.com>) and [ViewEncapsulation API](<https://angular.dev/api/core/ViewEncapsulation?utm_source=chatgpt.com>).
 
-For further learning:
+## 8. Best practices for managing styles in large Angular applications
 
-- [Angular Signals Guide](<https://angular.dev/guide/signals?utm_source=chatgpt.com>)
-- [signal() API Reference](<https://angular.dev/api/core/signal?utm_source=chatgpt.com>)
-- [computed() API Reference](<https://angular.dev/api/core/computed?utm_source=chatgpt.com>)
-- [input() API Reference](<https://angular.dev/api/core/input?utm_source=chatgpt.com>)
+When building enterprise-level Angular 21 applications, managing CSS properly is very important.
 
-My recommendation: First become comfortable with `signal()`, `.set()`, `.update()`, and reading signals using `()`. Then move on to `computed()`, `effect()`, and signal-based component inputs. These are important concepts for becoming proficient with modern Angular development.
+I recommend the following folder structure:
 
+text
 
-
-In Angular interviews, especially for Angular 17–21, interviewers can ask questions about Signals in different ways: basic concepts, practical coding, output-based questions, debugging, and real-world scenarios.
-
-Here are commonly asked interview questions based on the input-field Signals topic.
-
-# Angular Signals Interview Questions (Angular 21)
-
-## 1. Basic interview questions
-
-1. What are Signals in Angular?
-2. Why were Signals introduced in Angular?
-3. How do you create a Signal?
-4. What is the difference between `signal()` and a normal variable?
-5. How do you get the value of a Signal?
-6. How do you update a Signal?
-7. What is the difference between `.set()` and `.update()`?
-8. Can a Signal store strings, numbers, arrays, and objects?
-9. What is a writable Signal?
-10. What is the difference between `signal()` and `computed()`?
-
-## 2. Practical coding interview questions
-
-These are particularly important because interviewers often ask you to write code.
-
-Question 1: Create a Signal for an input field.
-
-Expected answer:
-
-typescript
-
-```typescript
-name = signal<string>('');
+```text
+src/
+│
+├── app/
+│   │
+│   ├── components/
+│   │   ├── header/
+│   │   │   ├── header.component.ts
+│   │   │   ├── header.component.html
+│   │   │   └── header.component.css
+│   │   │
+│   │   └── sidebar/
+│   │       ├── sidebar.component.ts
+│   │       ├── sidebar.component.html
+│   │       └── sidebar.component.css
+│   │
+│   ├── pages/
+│   │   ├── home/
+│   │   ├── login/
+│   │   └── dashboard/
+│   │
+│   └── app.ts
+│
+├── styles/
+│   ├── abstracts/
+│   │   ├── _variables.scss
+│   │   └── _mixins.scss
+│   │
+│   ├── base/
+│   │   ├── _reset.scss
+│   │   └── _typography.scss
+│   │
+│   ├── components/
+│   │   ├── _buttons.scss
+│   │   └── _forms.scss
+│   │
+│   ├── layout/
+│   │   ├── _header.scss
+│   │   └── _footer.scss
+│   │
+│   └── themes/
+│       ├── _light.scss
+│       └── _dark.scss
+│
+└── styles.scss
 ```
 
-Question 2: How do you get the input value using Signals?
+### Best practice 1: Keep component-specific CSS inside components
 
-typescript
+For example:
 
-```typescript
-console.log(this.name());
+text
+
+```text
+login/
+  login.component.ts
+  login.component.html
+  login.component.css
 ```
 
-Question 3: How do you set an input value programmatically?
+Avoid putting every component's CSS inside the global stylesheet.
 
-typescript
+### Best practice 2: Keep common styles globally
 
-```typescript
-this.name.set('Angular Developer');
-```
+Examples:
 
-Question 4: How do you reset an input field using a button?
+- Fonts.
+- Colors.
+- Typography.
+- CSS reset.
+- Common utility classes.
+- Theme variables.
 
-typescript
+### Best practice 3: Use CSS variables
 
-```typescript
-resetName() {
-  this.name.set('');
+Define common colors and dimensions in one place.
+
+css
+
+```css
+:root {
+  --primary-color: #1976d2;
+  --danger-color: #f44336;
+  --success-color: #4caf50;
+
+  --spacing-small: 8px;
+  --spacing-medium: 16px;
+  --spacing-large: 24px;
 }
 ```
 
-Question 5: How do you bind an input field with a Signal?
+Use them inside component CSS:
+
+css
+
+```css
+button {
+  background-color: var(--primary-color);
+  padding: var(--spacing-medium);
+}
+```
+
+### Best practice 4: Avoid ViewEncapsulation.None unless necessary
+
+Prefer the default `Emulated` mode.
+
+Use `None` only when you intentionally want component styles to become global.
+
+### Best practice 5: Avoid excessive use of \!important
+
+Avoid:
+
+css
+
+```css
+h1 {
+  color: red !important;
+}
+```
+
+Prefer proper CSS architecture and selector specificity.
+
+### Best practice 6: Use SCSS for larger projects
+
+SCSS supports variables, mixins, nesting and reusable stylesheet structures.
+
+Example:
+
+scss
+
+```scss
+$primary-color: #1976d2;
+
+@mixin primary-button {
+  background-color: $primary-color;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+}
+
+button {
+  @include primary-button;
+}
+```
+
+Angular supports Sass and other CSS preprocessors.
+
+### Best practice 7: Avoid ::ng-deep
+
+Avoid using:
+
+css
+
+```css
+::ng-deep .some-class {
+  color: red;
+}
+```
+
+Angular strongly discourages new uses of `::ng-deep`.
+
+Instead, prefer:
+
+- Component inputs and CSS custom properties.
+- A documented global stylesheet for genuinely global overrides.
+- Supported styling APIs provided by third-party libraries.
+
+### Best practice 8: Organize styles by responsibility
+
+Don't create a single CSS file containing thousands of unrelated rules.
+
+Separate styles into logical groups such as:
+
+- Base.
+- Layout.
+- Components.
+- Utilities.
+- Themes.
+
+## 9. Which styling approach should you use?
+
+Here is a practical recommendation for Angular 21:
+
+| Requirement | Recommended approach |
+| --- | --- |
+| Application-wide font | Global CSS |
+| Application-wide colors | Global CSS variables |
+| Login page design | Component CSS |
+| Dashboard design | Component CSS |
+| Common buttons | Global CSS or reusable button component |
+| Dynamic text color | Angular style binding |
+| Dynamic background | Angular style binding |
+| Small component styles | Internal styles |
+| Large component styles | External CSS/SCSS |
+| Multiple global stylesheets | `angular.json` |
+| Multiple component stylesheets | `styleUrls` |
+| Strong native CSS isolation | ShadowDom |
+
+## 10. Important interview questions and answers
+
+Q1. What is the difference between global CSS and component CSS?
+
+Global CSS can apply throughout the application, whereas component CSS is normally scoped to its component using Angular's encapsulation mechanism.
+
+Q2. Can global CSS override component CSS?
+
+Yes. Global CSS can affect elements inside components using Emulated encapsulation. The winning declaration depends on specificity, source order and other CSS cascade rules.
+
+Q3. Can we use multiple CSS files in one component?
+
+Yes. Use the `styleUrls` property.
+
+typescript
+
+```typescript
+styleUrls: [
+  './home.css',
+  './responsive.css',
+  './theme.css'
+]
+```
+
+Q4. Can we use multiple global CSS files?
+
+Yes. Register multiple files in the `styles` array of `angular.json`.
+
+Q5. What is the default Angular encapsulation mode?
+
+`ViewEncapsulation.Emulated`.
+
+Q6. What happens when we use ViewEncapsulation.None?
+
+Angular disables component style encapsulation. The component's CSS behaves like global CSS.
+
+Q7. What is the difference between styleUrl and styleUrls?
+
+- `styleUrl`: One external stylesheet.
+- `styleUrls`: Multiple external stylesheets.
+
+Q8. Are component styles loaded when a lazy-loaded component is loaded?
+
+Yes. Angular associates component styles with the component, so they are included when the component is rendered, including lazy-loaded components.
+
+Q9. Are global styles inherited by child components?
+
+Global CSS selectors can match elements inside child components. However, CSS inheritance is different: properties such as `color` and `font-family` inherit naturally, while properties such as `margin` and `padding` do not.
+
+Q10. Does component CSS automatically apply to child component templates?
+
+No. With Emulated encapsulation, the parent's component CSS normally applies to its own template, not the internal template of its child component.
+
+## 11. Final summary
+
+## Angular 21 styling cheat sheet
+
+Component styling
+
+Local
+
+typescript
+
+```typescript
+styleUrl: './home.css'
+```
+
+Global styling
+
+Application-wide
+
+json
+
+```json
+"styles": [
+  "src/styles.css"
+]
+```
+
+Multiple component stylesheets
+
+typescript
+
+```typescript
+styleUrls: [
+  './home.css',
+  './responsive.css'
+]
+```
+
+Internal styles
+
+typescript
+
+```typescript
+styles: `
+  h1 { color: red; }
+`
+```
+
+Inline styles
 
 HTMLWrap linesCopy codePreview
 
 ```html
-<input
-  [value]="name()"
-  (input)="name.set($any($event.target).value)"
-/>
+<h1 style="color: red">Hello</h1>
 ```
 
-Question 6: How do you increment a counter using Signals?
+Default encapsulation
 
 typescript
 
 ```typescript
-count = signal<number>(0);
-
-increment() {
-  this.count.update(value => value + 1);
-}
+encapsulation: ViewEncapsulation.Emulated
 ```
 
-Question 7: How do you store an object in a Signal?
+### Official Angular 21 documentation
 
-typescript
+For further learning, these are the most useful references:
 
-```typescript
-user = signal<User>({
-  name: 'John',
-  age: 25
-});
+1. [Styling Components – Angular 21](<https://v21.angular.dev/guide/components/styling?utm_source=chatgpt.com>)
+2. [Anatomy of Angular Components](<https://v21.angular.dev/guide/components?utm_source=chatgpt.com>)
+3. [Angular Component API](<https://angular.dev/api/core/Component?utm_source=chatgpt.com>)
+4. [ViewEncapsulation API](<https://angular.dev/api/core/ViewEncapsulation?utm_source=chatgpt.com>)
 
-interface User {
-  name: string;
-  age: number;
-}
-```
-
-## 3. Output-based interview questions
-
-Interviewers may give you code and ask what the output will be.
-
-Question 1: What will be the output?
-
-typescript
-
-```typescript
-name = signal<string>('Angular');
-
-console.log(this.name());
-```
-
-Answertext
-
-```text
-Angular
-```
-
-Question 2: What will be the output?
-
-typescript
-
-```typescript
-count = signal<number>(10);
-
-this.count.set(20);
-
-console.log(this.count());
-```
-
-Answertext
-
-```text
-20
-```
-
-Question 3: What will be the output?
-
-typescript
-
-```typescript
-count = signal<number>(5);
-
-this.count.update(value => value + 5);
-
-console.log(this.count());
-```
-
-Answertext
-
-```text
-10
-```
-
-Question 4: What is wrong with this code?
-
-typescript
-
-```typescript
-name = signal<string>('');
-
-this.name = 'John';
-```
-
-AnswerYou cannot assign a string directly to a Signal.
-
-Correct:
-
-typescript
-
-```typescript
-this.name.set('John');
-```
-
-## 4. Scenario-based interview questions
-
-These questions test whether you can use Signals in real applications.
-
-| Interview question | Concept tested |
-| --- | --- |
-| How do you clear an input field after submitting a form? | `set()` |
-| How do you update a counter without reading its value separately? | `update()` |
-| How do you calculate the total price reactively? | `computed()` |
-| How do you share data between parent and child components? | `input()` and `output()` |
-| How do you prevent direct modification of a Signal? | `asReadonly()` |
-| How do you react to changes in a Signal? | `effect()` |
-| How do you update an object stored in a Signal? | Immutable updates |
-| How do you handle an initially empty Signal? | Union types |
-
-## 5. Tricky Angular Signals interview questions
-
-These are useful for experienced Angular developers.
-
-Q1. What is the difference between `signal()` and `computed()`?
-
-- `signal()` creates a writable reactive value.
-- `computed()` creates a read-only derived reactive value.
-
-Q2. Can we modify a Signal directly?
-
-No. Use `.set()` or `.update()`.
-
-Q3. Does changing a Signal update the UI automatically?
-
-Yes. Angular tracks Signal dependencies and updates the relevant template when the value changes.
-
-Q4. What is `asReadonly()`?
-
-It exposes a read-only view of a writable Signal.
-
-typescript
-
-```typescript
-count = signal(10);
-
-readonlyCount = this.count.asReadonly();
-```
-
-Q5. What is the difference between `input()` and `signal()`?
-
-- `signal()` creates a writable Signal.
-- `input()` creates a read-only Signal-based input for receiving data from a parent component.
-
-Q6. What happens if you directly mutate an object inside a Signal?
-
-typescript
-
-```typescript
-user = signal({ name: 'John' });
-
-this.user().name = 'David';
-```
-
-This does not notify Signal consumers of the mutation. Prefer:
-
-typescript
-
-```typescript
-this.user.update(user => ({
-  ...user,
-  name: 'David'
-}));
-```
-
-
-## 6. What I recommend preparing for Angular 21 interviews
-
-Study these topics in this order:
-
-1. Signals: `signal()`, `.set()`, `.update()`.
-2. `computed()` and `effect()`.
-3. `input()` and `output()`.
-4. Signal-based form handling.
-5. Parent-child communication using Signals.
-6. RxJS Observables vs Signals.
-7. Change detection and `OnPush`.
-8. Linked Signals (`linkedSignal()`).
-9. Resource APIs and async reactive data.
-10. Real-world coding problems using Signals.
-
-Interview tip: Don't just memorize definitions. Practice writing small components, explaining why you used `.set()` instead of `.update()`, and describing how Angular reacts when a Signal changes. That is what makes your answers stronger in technical interviews.
+My recommendation: For a large Angular 21 application, use global SCSS/CSS for common design rules and component-level SCSS/CSS for individual component designs. Keep the default `ViewEncapsulation.Emulated` unless you have a specific reason to change it. This gives you a clean, reusable and maintainable styling architecture.

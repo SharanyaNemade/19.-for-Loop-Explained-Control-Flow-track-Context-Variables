@@ -1,16 +1,16 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { GetSetUsingSignals } from './get-set-using-signals';
+import { CSSRules } from './css-rules';
 
-describe('GetSetUsingSignals', () => {
-  let component: GetSetUsingSignals;
-  let fixture: ComponentFixture<GetSetUsingSignals>;
+describe('CSSRules', () => {
+  let component: CSSRules;
+  let fixture: ComponentFixture<CSSRules>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [GetSetUsingSignals],
+      imports: [CSSRules],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(GetSetUsingSignals);
+    fixture = TestBed.createComponent(CSSRules);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });

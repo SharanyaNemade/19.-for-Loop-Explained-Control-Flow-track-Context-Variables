@@ -1,1 +1,41 @@
 /* You can add global styles to this file, and also import other style files */
+.heading{
+    background-color: orange;
+    border-radius: 10px;
+    color: white;
+    padding: 10px;
+}
+
+.btn{
+    background-color: gray;
+    padding: 5px 10px;
+    border: 0;
+    cursor: pointer;
+    border-radius: 4px;
+    color: antiquewhite;
+}
+
+
+.btn-primary{
+    background-color: rgb(0, 140, 255);
+}
+
+
+.btn-primary:hover{
+    background-color: rgb(0, 140, 255);
+}
+
+
+.btn-success{
+    background-color: green;
+}
+
+
+.btn-warning{
+    background-color: red;
+}
+
+
+.btn-warning:hover{
+    background-color: green(255, 55, 0);;
+}
