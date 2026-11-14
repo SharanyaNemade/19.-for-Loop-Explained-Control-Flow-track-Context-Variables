@@ -1,1243 +1,1046 @@
 # Angular21Tutorial
 
-# Angular 21 – Complete Guide to Component Styling and Global Styling
+# Angular 21 – Control Flow and Conditional Rendering
 
-Angular provides several ways to apply CSS to an application. The most important distinction is between component-level styling and global styling.
+Control flow is one of the most important concepts in Angular. It allows developers to dynamically display, hide, or change elements based on conditions, application state, user interactions, and API responses.
 
-In Angular 21, you can use:
+In Angular 21, we use the modern built-in control flow syntax:
 
-- Component-specific CSS files.
-- Global CSS files.
-- Inline CSS styles.
-- Multiple stylesheets in a component.
-- CSS preprocessors such as SCSS and LESS.
-- Angular's view encapsulation to control how styles affect components.
+- `@if` – Conditional rendering.
+- `@else` – Alternative rendering.
+- `@else if` – Multiple conditional branches.
+- `@switch`, `@case`, `@default` – Multiple fixed-value conditions.
+- Signals – Reactive state management.
+- Event binding – Handling user interactions such as clicks and dropdown changes.
 
-Let's understand each concept with practical examples.
+Let's understand each concept with practical examples, step by step.
 
-## 1. What is component-level styling in Angular?
+## 1. What is Control Flow in Angular?
 
-Component-level styling means writing CSS specifically for an individual Angular component.
-
-For example, suppose you have these components:
-
-text
-
-```text
-src/
-  app/
-    home/
-      home.component.ts
-      home.component.html
-      home.component.css
-
-    login/
-      login.component.ts
-      login.component.html
-      login.component.css
-
-    dashboard/
-      dashboard.component.ts
-      dashboard.component.html
-      dashboard.component.css
-```
-
-Each component has its own CSS file.
-
-home.component.css
-
-css
-
-```css
-h1 {
-  color: blue;
-}
-
-.home-container {
-  background-color: lightblue;
-  padding: 20px;
-}
-```
-
-login.component.css
-
-css
-
-```css
-h1 {
-  color: red;
-}
-
-.login-container {
-  background-color: lightyellow;
-  padding: 20px;
-}
-```
-
-home.component.ts
-
-typescript
-
-```typescript
-import { Component } from '@angular/core';
-
-@Component({
-  selector: 'app-home',
-  standalone: true,
-  templateUrl: './home.component.html',
-  styleUrl: './home.component.css'
-})
-export class HomeComponent {}
-```
-
-home.component.html
-
-HTMLWrap linesCopy codePreview
-
-```html
-<div class="home-container">
-  <h1>Home Page</h1>
-</div>
-```
-
-login.component.ts
-
-typescript
-
-```typescript
-import { Component } from '@angular/core';
-
-@Component({
-  selector: 'app-login',
-  standalone: true,
-  templateUrl: './login.component.html',
-  styleUrl: './login.component.css'
-})
-export class LoginComponent {}
-```
-
-### What happens here?
-
-- Home component uses its own CSS.
-- Login component uses its own CSS.
-- The `h1` in Home is blue.
-- The `h1` in Login is red.
-- The CSS from one component normally does not affect another component.
-
-This is possible because Angular uses `ViewEncapsulation.Emulated` by default.
-
-When should you use component-level styling?
-
-Use it when:
-
-- Styling buttons, forms, cards, tables, etc., that belong to a particular component.
-- Building reusable components.
-- Developing large applications with multiple developers.
-- Keeping CSS maintainable and organized.
-
-## 2. What is global styling in Angular?
-
-Global styling means writing CSS that can apply throughout the entire Angular application.
-
-Instead of creating CSS separately for every component, you define common styles in global CSS files.
-
-Angular CLI projects normally have a global stylesheet:
-
-text
-
-```text
-src/
-  styles.css
-```
-
-You can define common styles there.
-
-styles.css
-
-css
-
-```css
-body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-}
-
-h1 {
-  color: green;
-}
-
-button {
-  padding: 10px 20px;
-  background-color: blue;
-  color: white;
-}
-
-.container {
-  width: 90%;
-  margin: auto;
-}
-```
-
-Now these styles can affect matching elements throughout your Angular application.
+Control flow determines which HTML elements or components should be rendered based on a particular condition.
 
 For example:
 
-home.component.html
+- Show Login if the user is not logged in.
+- Show Dashboard if the user is logged in.
+- Show a loading message while API data is loading.
+- Show success or error messages after submitting a form.
+- Show additional fields when a dropdown option is selected.
+
+### Traditional Angular syntax vs Angular 21
+
+Earlier Angular applications commonly used structural directives:
 
 HTMLWrap linesCopy codePreview
 
 ```html
-<h1>Home Page</h1>
-
-<div class="container">
-  Welcome to Home
+<div *ngIf="isLoggedIn">
+  Welcome User!
 </div>
 
-<button>Submit</button>
-```
-
-login.component.html
-
-HTMLWrap linesCopy codePreview
-
-```html
-<h1>Login Page</h1>
-
-<div class="container">
-  Login Form
+<div *ngIf="!isLoggedIn">
+  Please Login
 </div>
-
-<button>Login</button>
 ```
 
-Both components can use the styles defined in `styles.css`.
-
-### When should you use global styling?
-
-Use global CSS for:
-
-- Common fonts and typography.
-- Application-wide colors.
-- CSS resets.
-- Body and HTML styling.
-- Common button styles.
-- Common utility classes.
-- Theme variables.
-- Third-party library styles.
-
-For example, if your entire application uses the same primary color, define it globally:
-
-css
-
-```css
-:root {
-  --primary-color: #1976d2;
-  --secondary-color: #424242;
-  --background-color: #f5f5f5;
-}
-
-body {
-  background-color: var(--background-color);
-}
-
-.primary-button {
-  background-color: var(--primary-color);
-}
-```
-
-Now multiple components can use the same CSS variables.
-
-## 3. Difference between component styles and global styles
-
-| Feature | Component styles | Global styles |
-| --- | --- | --- |
-| Scope | Normally limited to one component | Application-wide |
-| Location | Component CSS file | `src/styles.css` or another global file |
-| Reusability | Specific to component | Shared across components |
-| Encapsulation | Usually Emulated | Not encapsulated |
-| Maintenance | Managed per component | Managed centrally |
-| Best use | Component-specific UI | Common application design |
-| Example | Login form styling | Common fonts and colors |
-
-### Visual understanding
-
-Global CSS
-
-Entire Angular application
-
-Home
-
-Global CSS
-
-Login
-
-Global CSS
-
-Dashboard
-
-Global CSS
-
-Component CSS
-
-Home CSS
-
-Home only
-
-Login CSS
-
-Login only
-
-Dashboard CSS
-
-Dashboard only
-
-Important: Global styles can still affect elements inside components using Angular's default Emulated encapsulation. Component encapsulation prevents component CSS from leaking out; it does not prevent global CSS from entering.
-
-## 4. Inline styles vs internal styles vs external styles
-
-These are three common ways of writing CSS.
-
-### A. Inline styles
-
-Inline styles mean writing CSS directly inside an HTML element using the `style` attribute.
-
-Example:
+Modern Angular uses built-in control flow:
 
 HTMLWrap linesCopy codePreview
 
 ```html
-<h1 style="color: red; font-size: 30px;">
-  Welcome to Angular
-</h1>
+@if (isLoggedIn) {
+  <div>Welcome User!</div>
+} @else {
+  <div>Please Login</div>
+}
+```
 
-<button style="background-color: blue; color: white;">
-  Submit
+Important: `@if` and `@else` are built into Angular. You don't need to import `CommonModule` or `NgIf` to use them.
+
+## 2. @if and @else Syntax in Angular 21
+
+The basic syntax is:
+
+HTMLWrap linesCopy codePreview
+
+```html
+@if (condition) {
+  <!-- HTML when condition is true -->
+} @else {
+  <!-- HTML when condition is false -->
+}
+```
+
+### Example: Login status
+
+app.component.ts
+
+typescript
+
+```typescript
+import { Component, signal } from '@angular/core';
+
+@Component({
+  selector: 'app-root',
+  standalone: true,
+  templateUrl: './app.component.html'
+})
+export class AppComponent {
+
+  isLoggedIn = signal(false);
+
+}
+```
+
+app.component.html
+
+HTMLWrap linesCopy codePreview
+
+```html
+@if (isLoggedIn()) {
+  <h2>Welcome to Dashboard!</h2>
+} @else {
+  <h2>Please Login First</h2>
+}
+```
+
+Here:
+
+- `signal(false)` creates a reactive boolean value.
+- `isLoggedIn()` reads the signal value.
+- If the value is `true`, Angular displays the dashboard message.
+- If the value is `false`, Angular displays the login message.
+
+## 3. Conditional Rendering with Signals
+
+Signals are a reactive state management feature in Angular.
+
+A signal stores a value and notifies Angular when that value changes.
+
+### Example
+
+app.component.ts
+
+typescript
+
+```typescript
+import { Component, signal } from '@angular/core';
+
+@Component({
+  selector: 'app-root',
+  standalone: true,
+  templateUrl: './app.component.html'
+})
+export class AppComponent {
+
+  count = signal(0);
+
+  increment() {
+    this.count.update(value => value + 1);
+  }
+
+  decrement() {
+    this.count.update(value => value - 1);
+  }
+
+}
+```
+
+app.component.html
+
+HTMLWrap linesCopy codePreview
+
+```html
+<h2>Count: {{ count() }}</h2>
+
+<button (click)="increment()">Increment</button>
+
+<button (click)="decrement()">Decrement</button>
+
+@if (count() > 0) {
+  <p>Count is positive</p>
+} @else if (count() === 0) {
+  <p>Count is zero</p>
+} @else {
+  <p>Count is negative</p>
+}
+```
+
+How does it work?
+
+1. Initially, count is 0.
+2. Click Increment.
+3. Count becomes 1.
+4. Angular detects the signal update.
+5. The appropriate conditional block is rendered.
+
+Interview tip Signals are read by calling them as functions, such as `count()`. Use `.set()` to replace a value and `.update()` to calculate a new value from the existing one.
+
+## 4. Toggle Show/Hide Elements
+
+One of the most common real-world use cases is showing and hiding elements when a user clicks a button.
+
+### TypeScript
+
+typescript
+
+```typescript
+import { Component, signal } from '@angular/core';
+
+@Component({
+  selector: 'app-root',
+  standalone: true,
+  templateUrl: './app.component.html'
+})
+export class AppComponent {
+
+  isVisible = signal(false);
+
+  toggleVisibility() {
+    this.isVisible.update(value => !value);
+  }
+
+}
+```
+
+### HTML
+
+HTMLWrap linesCopy codePreview
+
+```html
+<button (click)="toggleVisibility()">
+  {{ isVisible() ? 'Hide Details' : 'Show Details' }}
+</button>
+
+@if (isVisible()) {
+  <div>
+    <h3>Angular 21</h3>
+    <p>Welcome to conditional rendering!</p>
+  </div>
+}
+```
+
+Output behavior:
+
+| Action | Result |
+| --- | --- |
+| Initial page load | Details hidden |
+| Click Show Details | Details displayed |
+| Click Hide Details | Details removed |
+
+Remember: `@if` removes the conditional content from the DOM when its condition becomes false. It does not merely make the element invisible.
+
+If you want to keep an element in the DOM and only hide it visually, use CSS:
+
+HTMLWrap linesCopy codePreview
+
+```html
+<div [hidden]="!isVisible()">
+  This element is hidden visually.
+</div>
+```
+
+## 5. Multiple Conditions: Not Started, In Progress, Success, Error
+
+This is a very important real-time application example.
+
+Imagine an application that submits data to an API. Depending on the response, we need to display different messages.
+
+We have four states:
+
+- `notStarted`
+- `inProgress`
+- `success`
+- `error`
+
+### TypeScript
+
+typescript
+
+```typescript
+import { Component, signal } from '@angular/core';
+
+type Status =
+  | 'notStarted'
+  | 'inProgress'
+  | 'success'
+  | 'error';
+
+@Component({
+  selector: 'app-root',
+  standalone: true,
+  templateUrl: './app.component.html'
+})
+export class AppComponent {
+
+  status = signal<Status>('notStarted');
+
+  startProcess() {
+    this.status.set('inProgress');
+
+    setTimeout(() => {
+      this.status.set('success');
+    }, 2000);
+  }
+
+  reset() {
+    this.status.set('notStarted');
+  }
+
+  showError() {
+    this.status.set('error');
+  }
+
+}
+```
+
+### HTML
+
+HTMLWrap linesCopy codePreview
+
+```html
+<h2>API Status Example</h2>
+
+<button
+  (click)="startProcess()"
+  [disabled]="status() === 'inProgress'">
+  Start Process
+</button>
+
+<button (click)="showError()">
+  Simulate Error
+</button>
+
+<button (click)="reset()">
+  Reset
+</button>
+
+@if (status() === 'notStarted') {
+  <p>Process has not started yet.</p>
+}
+
+@else if (status() === 'inProgress') {
+  <p>Loading... Please wait.</p>
+}
+
+@else if (status() === 'success') {
+  <p>Data submitted successfully!</p>
+}
+
+@else if (status() === 'error') {
+  <p>Something went wrong!</p>
+}
+```
+
+### Understanding the flow
+
+## API status flow
+
+Not Started
+
+Initial state
+
+In Progress
+
+API request running
+
+Success
+
+Request completed
+
+Error
+
+Request failed
+
+Interview point: Use `@if` and `@else if` when conditions involve different logical expressions. Use `@switch` when comparing one variable against multiple fixed values.
+
+### Alternative: Using @switch
+
+The same example can be written using `@switch`.
+
+HTMLWrap linesCopy codePreview
+
+```html
+@switch (status()) {
+
+  @case ('notStarted') {
+    <p>Process not started.</p>
+  }
+
+  @case ('inProgress') {
+    <p>Loading...</p>
+  }
+
+  @case ('success') {
+    <p>Success!</p>
+  }
+
+  @case ('error') {
+    <p>Error occurred!</p>
+  }
+
+  @default {
+    <p>Unknown status.</p>
+  }
+
+}
+```
+
+`@switch` uses strict equality (`===`) and does not fall through between cases.
+
+Angular
+
+## 6. Dropdown-Based Conditional Rendering
+
+This is another frequently asked Angular interview and practical development question.
+
+Requirement: When the user selects a country, display the corresponding information.
+
+## Interactive country dropdown
+
+Select a country to see conditional rendering in action.
+
+ India # 🇮🇳 India
+
+Capital: New Delhi
+
+Currency: Indian Rupee (INR)
+
+### Actual Angular implementation
+
+app.component.ts
+
+typescript
+
+```typescript
+import { Component, signal } from '@angular/core';
+
+@Component({
+  selector: 'app-root',
+  standalone: true,
+  templateUrl: './app.component.html'
+})
+export class AppComponent {
+
+  selectedCountry = signal('India');
+
+  onCountryChange(event: Event) {
+    const value = (event.target as HTMLSelectElement).value;
+
+    this.selectedCountry.set(value);
+  }
+
+}
+```
+
+app.component.html
+
+HTMLWrap linesCopy codePreview
+
+```html
+<h2>Select Country</h2>
+
+<select
+  [value]="selectedCountry()"
+  (change)="onCountryChange($event)">
+
+  <option value="India">India</option>
+  <option value="USA">USA</option>
+  <option value="UK">UK</option>
+
+</select>
+
+@if (selectedCountry() === 'India') {
+  <p>Welcome to India</p>
+}
+@else if (selectedCountry() === 'USA') {
+  <p>Welcome to USA</p>
+}
+@else if (selectedCountry() === 'UK') {
+  <p>Welcome to UK</p>
+}
+```
+
+What happens internally?
+
+1. User selects a country.
+2. The `(change)` event executes.
+3. `$event` provides the DOM event object.
+4. We retrieve the selected dropdown value.
+5. The signal is updated using `.set()`.
+6. Angular updates the conditional content.
+
+## 7. Handling DOM Events Properly
+
+Angular provides event binding using parentheses `()`.
+
+General syntax:
+
+HTMLWrap linesCopy codePreview
+
+```html
+<button (click)="methodName()">
+  Click Me
 </button>
 ```
 
-You can also use Angular style bindings:
+Some commonly used DOM events:
+
+| Event | Purpose |
+| --- | --- |
+| `(click)` | Button click |
+| `(change)` | Dropdown or input change |
+| `(input)` | Input value changes |
+| `(keyup)` | Keyboard key released |
+| `(keydown)` | Keyboard key pressed |
+| `(mouseover)` | Mouse enters element |
+| `(submit)` | Form submission |
+
+### Example: Input-based conditional rendering
+
+TypeScript
+
+typescript
+
+```typescript
+import { Component, signal } from '@angular/core';
+
+@Component({
+  selector: 'app-root',
+  standalone: true,
+  templateUrl: './app.component.html'
+})
+export class AppComponent {
+
+  username = signal('');
+
+}
+```
+
+HTML
 
 HTMLWrap linesCopy codePreview
 
 ```html
-<h1 [style.color]="headingColor">
-  Welcome
-</h1>
+<input
+  type="text"
+  placeholder="Enter username"
+  (input)="username.set($any($event.target).value)"
+/>
 
-<div [style.background-color]="backgroundColor">
-  Angular Content
+@if (username().length > 0) {
+  <p>Hello, {{ username() }}!</p>
+}
+@else {
+  <p>Please enter your username.</p>
+}
+```
+
+Here, `$event` represents the event object, and `$event.target` represents the element that triggered the event.
+
+For better type safety, you can also handle the event in a TypeScript method, as demonstrated in the dropdown example.
+
+Angular event binding documentation: [Event binding – Angular official documentation](<https://angular.dev/guide/templates/event-binding?utm_source=chatgpt.com>).
+
+## 8. Common Developer Mistakes in Angular Conditional Rendering
+
+These are common mistakes that developers should avoid.
+
+### Mistake 1: Forgetting parentheses when reading a signal
+
+IncorrectHTMLWrap linesCopy codePreview
+
+```html
+@if (isLoggedIn) {
+  <p>Welcome!</p>
+}
+```
+
+CorrectHTMLWrap linesCopy codePreview
+
+```html
+@if (isLoggedIn()) {
+  <p>Welcome!</p>
+}
+```
+
+A signal must be called to read its current value.
+
+### Mistake 2: Using assignment instead of comparison
+
+IncorrectHTMLWrap linesCopy codePreview
+
+```html
+@if (status = 'success') {
+  <p>Success!</p>
+}
+```
+
+CorrectHTMLWrap linesCopy codePreview
+
+```html
+@if (status() === 'success') {
+  <p>Success!</p>
+}
+```
+
+Use comparison operators when checking conditions.
+
+### Mistake 3: Using multiple independent conditions unnecessarily
+
+If only one state should be displayed at a time, prefer an `@if` / `@else if` chain.
+
+HTMLWrap linesCopy codePreview
+
+```html
+@if (status() === 'loading') {
+  <p>Loading...</p>
+} @else if (status() === 'success') {
+  <p>Success!</p>
+} @else {
+  <p>Something else.</p>
+}
+```
+
+Separate `@if` blocks are independent and can render multiple sections simultaneously.
+
+### Mistake 4: Incorrectly accessing dropdown values
+
+IncorrectHTMLWrap linesCopy codePreview
+
+```html
+<select (change)="selectedCountry.set($event)">
+```
+
+The event object is not the selected string value.
+
+Correcttypescript
+
+```typescript
+onCountryChange(event: Event) {
+  const value = (event.target as HTMLSelectElement).value;
+  this.selectedCountry.set(value);
+}
+```
+
+### Mistake 5: Using `@if` when you only want visual hiding
+
+`@if` destroys and recreates the conditional view when the condition changes.
+
+If you only want to hide the element visually, consider:
+
+HTMLWrap linesCopy codePreview
+
+```html
+<div [hidden]="!showDetails()">
+  Additional Information
 </div>
 ```
 
-Advantages:
+### Mistake 6: Putting too much business logic inside HTML
 
-- Easy to apply quick styling.
-- Useful for dynamic styles.
-- No separate CSS file required.
+Avoid complicated expressions:
 
-Disadvantages:
+HTMLWrap linesCopy codePreview
 
-- Difficult to maintain when used extensively.
-- Can make HTML complicated.
-- Not suitable for reusable styling.
+```html
+@if (user() && user().age >= 18 &&
+     user().isActive && user().role === 'admin') {
+  <p>Admin Access</p>
+}
+```
 
-Use inline styles for dynamic values or very small styling requirements.
+Prefer a computed signal.
 
-### B. Internal styles
+typescript
 
-Internal styles mean writing CSS inside the component's `@Component` decorator using the `styles` property.
+```typescript
+import { computed, signal } from '@angular/core';
+
+user = signal({
+  age: 25,
+  isActive: true,
+  role: 'admin'
+});
+
+isAdmin = computed(() => {
+  const u = this.user();
+
+  return u.age >= 18 &&
+         u.isActive &&
+         u.role === 'admin';
+});
+```
+
+HTMLWrap linesCopy codePreview
+
+```html
+@if (isAdmin()) {
+  <p>Admin Access</p>
+}
+```
+
+This makes your application easier to maintain.
+
+### Mistake 7: Not handling API loading, success and error states
+
+Don't display an empty page while waiting for API responses.
+
+Always consider:
+
+- Loading state.
+- Success state.
+- Error state.
+- Empty data state.
+
+These states improve user experience and make applications easier to debug.
+
+## 9. Real-Time Practical Example: Login and Dashboard
+
+Let's combine the concepts into one practical Angular 21 example.
+
+Requirement:
+
+- Initially display Login.
+- When the user clicks Login, display Dashboard.
+- When the user clicks Logout, return to Login.
+- Display different content based on login status.
+
+app.component.ts
+
+typescript
+
+```typescript
+import { Component, signal } from '@angular/core';
+
+@Component({
+  selector: 'app-root',
+  standalone: true,
+  templateUrl: './app.component.html'
+})
+export class AppComponent {
+
+  isLoggedIn = signal(false);
+
+  login() {
+    this.isLoggedIn.set(true);
+  }
+
+  logout() {
+    this.isLoggedIn.set(false);
+  }
+
+}
+```
+
+app.component.html
+
+HTMLWrap linesCopy codePreview
+
+```html
+<div>
+
+  <h1>Angular 21 Application</h1>
+
+  @if (isLoggedIn()) {
+
+    <h2>Welcome to Dashboard</h2>
+
+    <p>You are successfully logged in.</p>
+
+    <button (click)="logout()">
+      Logout
+    </button>
+
+  } @else {
+
+    <h2>Login Page</h2>
+
+    <p>Please login to continue.</p>
+
+    <button (click)="login()">
+      Login
+    </button>
+
+  }
+
+</div>
+```
+
+This example demonstrates four important Angular concepts:
+
+1. Signals for managing state.
+2. `@if` and `@else` for conditional rendering.
+3. Event binding using `(click)`.
+4. Updating the UI automatically when state changes.
+
+Note: This is a UI demonstration, not production authentication. A real login must validate credentials with a backend and enforce authorization on the server.
+
+## 10. Angular 21 Interview Questions and Answers
+
+Here are important interview questions, from beginner to advanced level.
+
+### Beginner-level questions
+
+Q1. What is control flow in Angular?
+
+Control flow determines which HTML elements or components should be displayed based on conditions.
+
+Angular provides built-in control flow blocks such as:
+
+- `@if`
+- `@else`
+- `@else if`
+- `@switch`
+- `@case`
+- `@default`
+- `@for`
+
+Q2. What is the difference between `@if` and `*ngIf`?
+
+| `@if` | `*ngIf` |
+| --- | --- |
+| Built-in control flow | Structural directive |
+| No import required | Requires NgIf/CommonModule |
+| Modern Angular syntax | Older syntax |
+| Recommended for new code | Deprecated since Angular 20 |
+
+Q3. What is the purpose of `@else`?
+
+It executes an alternative template when the `@if` condition is false.
+
+HTMLWrap linesCopy codePreview
+
+```html
+@if (isLoggedIn()) {
+  <p>Welcome!</p>
+} @else {
+  <p>Please login.</p>
+}
+```
+
+Q4. Can we use multiple `@else if` conditions?
+
+Yes. Angular supports multiple `@else if` branches.
+
+HTMLWrap linesCopy codePreview
+
+```html
+@if (marks() >= 90) {
+  <p>Grade A</p>
+} @else if (marks() >= 75) {
+  <p>Grade B</p>
+} @else if (marks() >= 50) {
+  <p>Grade C</p>
+} @else {
+  <p>Fail</p>
+}
+```
+
+### Intermediate-level questions
+
+Q5. What are Angular Signals?
+
+Signals are reactive values that notify Angular when their values change.
 
 Example:
 
 typescript
 
 ```typescript
-import { Component } from '@angular/core';
+count = signal(0);
 
-@Component({
-  selector: 'app-home',
-  standalone: true,
-  template: `
-    <h1>Welcome Home</h1>
-    <button>Submit</button>
-  `,
-  styles: `
-    h1 {
-      color: blue;
-    }
-
-    button {
-      background-color: green;
-      color: white;
-      padding: 10px;
-    }
-  `
-})
-export class HomeComponent {}
-```
-
-Here, CSS is written inside the TypeScript file.
-
-Advantages:
-
-- No separate CSS file required.
-- Useful for small components.
-- Styles are associated with the component.
-
-Disadvantages:
-
-- TypeScript files become lengthy.
-- Difficult to maintain large stylesheets.
-- HTML, TypeScript and CSS concerns become mixed.
-
-Use internal styles for small components with very few CSS rules.
-
-### C. External styles
-
-External styles mean writing CSS in a separate `.css` or `.scss` file and connecting it to the component.
-
-Example:
-
-home.component.css
-
-css
-
-```css
-h1 {
-  color: blue;
-}
-
-button {
-  background-color: green;
-  color: white;
-  padding: 10px;
+increment() {
+  this.count.update(value => value + 1);
 }
 ```
 
-home.component.ts
+Read a signal using `count()`.
+
+Q6. How do you toggle an element in Angular?
 
 typescript
 
 ```typescript
-import { Component } from '@angular/core';
+show = signal(false);
 
-@Component({
-  selector: 'app-home',
-  standalone: true,
-  templateUrl: './home.component.html',
-  styleUrl: './home.component.css'
-})
-export class HomeComponent {}
-```
-
-This is generally the recommended approach for medium and large components.
-
-### Comparison
-
-| Feature | Inline | Internal | External |
-| --- | --- | --- | --- |
-| Location | HTML element | TypeScript decorator | CSS file |
-| Syntax | `style=""` | `styles` | `styleUrl` |
-| Maintenance | Difficult | Moderate | Easy |
-| Reusability | Low | Low | Better organization |
-| Dynamic styling | Excellent with bindings | Not directly dynamic | Can use CSS variables and bindings |
-| Best use | Dynamic values | Small components | Most components |
-
-## 5. How to create and use multiple global CSS files
-
-Suppose you have a large Angular 21 application.
-
-You may want to separate global CSS into multiple files instead of maintaining everything inside `styles.css`.
-
-For example:
-
-text
-
-```text
-src/
-│
-├── app/
-│   ├── home/
-│   ├── login/
-│   └── dashboard/
-│
-├── styles/
-│   ├── reset.css
-│   ├── typography.css
-│   ├── variables.css
-│   ├── buttons.css
-│   ├── forms.css
-│   └── layout.css
-│
-└── styles.css
-```
-
-### Step 1: Create multiple CSS files
-
-reset.css
-
-css
-
-```css
-* {
-  box-sizing: border-box;
-}
-
-body {
-  margin: 0;
+toggle() {
+  this.show.update(value => !value);
 }
 ```
 
-variables.css
+HTMLWrap linesCopy codePreview
 
-css
+```html
+<button (click)="toggle()">Toggle</button>
 
-```css
-:root {
-  --primary-color: #1976d2;
-  --secondary-color: #424242;
-  --font-size: 16px;
+@if (show()) {
+  <p>Hello Angular!</p>
 }
 ```
 
-typography.css
+Q7. What is the difference between `@if` and `@switch`?
 
-css
-
-```css
-body {
-  font-family: Arial, sans-serif;
-  font-size: var(--font-size);
-}
-
-h1 {
-  font-size: 30px;
-}
-```
-
-buttons.css
-
-css
-
-```css
-.btn-primary {
-  background-color: var(--primary-color);
-  color: white;
-  padding: 10px 20px;
-  border: none;
-}
-```
-
-### Step 2: Register multiple CSS files in angular.json
-
-Open `angular.json`.
-
-Find the build configuration and its `styles` array.
+- `@if` is useful for evaluating boolean expressions and complex conditions.
+- `@switch` is useful for matching one expression against multiple possible values.
 
 Example:
 
-json
+HTMLWrap linesCopy codePreview
 
-```json
-{
-  "projects": {
-    "my-app": {
-      "architect": {
-        "build": {
-          "options": {
-            "styles": [
-              "src/styles/reset.css",
-              "src/styles/variables.css",
-              "src/styles/typography.css",
-              "src/styles/buttons.css",
-              "src/styles.css"
-            ]
-          }
-        }
-      }
-    }
+```html
+@switch (role()) {
+  @case ('admin') {
+    <p>Admin Dashboard</p>
+  }
+  @case ('user') {
+    <p>User Dashboard</p>
+  }
+  @default {
+    <p>Guest Dashboard</p>
   }
 }
 ```
 
-The important part is:
+Q8. What is `$event` in Angular?
 
-json
-
-```json
-"styles": [
-  "src/styles/reset.css",
-  "src/styles/variables.css",
-  "src/styles/typography.css",
-  "src/styles/buttons.css",
-  "src/styles.css"
-]
-```
-
-What happens?
-
-Angular includes all these files in the application's global styling bundle.
-
-You can now use their CSS classes in any component.
-
-For example:
+`$event` is a special template variable that provides the event object generated by a DOM event.
 
 HTMLWrap linesCopy codePreview
 
 ```html
-<h1>Angular 21</h1>
-
-<button class="btn-primary">
-  Submit
+<button (click)="handleClick($event)">
+  Click
 </button>
 ```
 
-You don't need to import these CSS files separately into every component.
+Q9. What is the difference between `.set()` and `.update()` in Signals?
 
-Important: CSS loading order matters. If two files define the same selector with equal specificity, the later applicable declaration generally wins.
-
-### Alternative: Import multiple CSS files inside styles.css
-
-Instead of listing every file in `angular.json`, you can use CSS `@import`.
-
-styles.css
-
-css
-
-```css
-@import './styles/reset.css';
-@import './styles/variables.css';
-@import './styles/typography.css';
-@import './styles/buttons.css';
-@import './styles/layout.css';
-```
-
-Then configure only:
-
-json
-
-```json
-"styles": [
-  "src/styles.css"
-]
-```
-
-Both approaches work. For larger applications, explicitly registering global styles in `angular.json` makes the application entry points easier to understand.
-
-## 6. How to load multiple CSS files inside a single component
-
-Angular 21 supports multiple component stylesheets.
-
-There are two ways to do this.
-
-### Method 1: Using styleUrls
-
-Suppose your component has two CSS files:
-
-text
-
-```text
-dashboard/
-  dashboard.component.ts
-  dashboard.component.html
-  dashboard.component.css
-  dashboard-responsive.css
-```
-
-dashboard.component.css
-
-css
-
-```css
-.dashboard {
-  background-color: lightblue;
-  padding: 20px;
-}
-```
-
-dashboard-responsive.css
-
-css
-
-```css
-@media (max-width: 768px) {
-  .dashboard {
-    padding: 10px;
-  }
-}
-```
-
-Now load both files inside the component.
-
-dashboard.component.ts
-
-typescript
-
-```typescript
-import { Component } from '@angular/core';
-
-@Component({
-  selector: 'app-dashboard',
-  standalone: true,
-  templateUrl: './dashboard.component.html',
-
-  styleUrls: [
-    './dashboard.component.css',
-    './dashboard-responsive.css'
-  ]
-})
-export class DashboardComponent {}
-```
-
-Both CSS files are associated with the Dashboard component.
-
-### Method 2: Using styleUrl and styles
-
-You can also combine an external stylesheet with internal styles.
-
-typescript
-
-```typescript
-@Component({
-  selector: 'app-dashboard',
-  standalone: true,
-  templateUrl: './dashboard.component.html',
-
-  styleUrl: './dashboard.component.css',
-
-  styles: `
-    h1 {
-      color: blue;
-    }
-
-    button {
-      padding: 10px;
-    }
-  `
-})
-export class DashboardComponent {}
-```
-
-### Difference between styleUrl, styleUrls and styles
-
-| Property | Purpose |
+| `.set()` | `.update()` |
 | --- | --- |
-| `styleUrl` | Loads one external CSS file |
-| `styleUrls` | Loads multiple external CSS files |
-| `styles` | Defines CSS directly inside component metadata |
+| Assigns a new value | Calculates a new value |
+| Takes the new value | Receives the previous value |
+| `count.set(10)` | `count.update(v => v + 1)` |
 
-Angular 21 supports all three.
+### Advanced-level questions
 
-My recommendation: Use `styleUrl` for one stylesheet and `styleUrls` when a component genuinely needs multiple external stylesheets. Keep styles grouped logically rather than creating too many small files.
+Q10. What happens internally when a Signal changes inside an `@if` condition?
 
-## 7. How Angular style encapsulation works
+1. Angular tracks the signal read by the template.
+2. The signal value changes.
+3. Angular is notified about the change.
+4. Angular updates the affected template.
+5. The appropriate conditional view is rendered or removed.
 
-This is one of the most important Angular styling concepts.
+Q11. Does `@if` hide an element or remove it from the DOM?
 
-Style encapsulation determines whether a component's CSS can affect other components.
+It removes the conditional view from the DOM when the condition is false. It can be recreated when the condition becomes true.
 
-Angular provides four encapsulation modes in Angular 21:
+Q12. Can we use Signals with API responses?
 
-1. `ViewEncapsulation.Emulated`
-2. `ViewEncapsulation.ShadowDom`
-3. `ViewEncapsulation.None`
-4. `ViewEncapsulation.ExperimentalIsolatedShadowDom`
-
-Let's understand them.
-
-### A. ViewEncapsulation.Emulated
-
-Default modeAngular uses Emulated encapsulation by default.
-
-Example:
-
-typescript
-
-```typescript
-@Component({
-  selector: 'app-home',
-  standalone: true,
-  template: `
-    <h1>Home Page</h1>
-  `,
-  styles: `
-    h1 {
-      color: red;
-    }
-  `
-})
-export class HomeComponent {}
-```
-
-Angular internally generates special attributes to scope the CSS selectors.
-
-Conceptually, the generated HTML looks like:
-
-HTMLWrap linesCopy codePreview
-
-```html
-<app-home _nghost-ng-c123>
-  <h1 _ngcontent-ng-c123>
-    Home Page
-  </h1>
-</app-home>
-```
-
-The generated CSS is conceptually similar to:
-
-css
-
-```css
-h1[_ngcontent-ng-c123] {
-  color: red;
-}
-```
-
-The actual generated attribute names are Angular implementation details.
-
-Result:
-
-- Home component CSS affects its own template elements.
-- It does not normally affect another component's template.
-- Global CSS can still affect Home component elements.
-
-### B. ViewEncapsulation.ShadowDom
-
-Angular uses the browser's native Shadow DOM.
-
-Example:
-
-typescript
-
-```typescript
-import {
-  Component,
-  ViewEncapsulation
-} from '@angular/core';
-
-@Component({
-  selector: 'app-home',
-  standalone: true,
-  template: `
-    <h1>Home Page</h1>
-  `,
-  styles: `
-    h1 {
-      color: red;
-    }
-  `,
-  encapsulation: ViewEncapsulation.ShadowDom
-})
-export class HomeComponent {}
-```
-
-Angular creates a Shadow Root for the component.
-
-How to Build a Lightweight Embeddable Widget in Vanilla JS (Under 30KB) - DEV Community
-
-[dev.to](<https://dev.to/alex_boykov/how-to-build-a-lightweight-embeddable-widget-in-vanilla-js-under-30kb-5f4b?utm_source=chatgpt.com>)
-
-Result:
-
-- Component CSS stays inside its Shadow DOM.
-- Internal styles do not affect outside elements.
-- Ordinary global CSS does not cross into the shadow tree.
-- Shadow DOM also changes how events, slots and DOM inspection work.
-
-Use this when you need native browser-level style isolation, especially for independently reusable web components.
-
-### C. ViewEncapsulation.None
-
-This disables Angular's style encapsulation.
-
-Example:
-
-typescript
-
-```typescript
-import {
-  Component,
-  ViewEncapsulation
-} from '@angular/core';
-
-@Component({
-  selector: 'app-home',
-  standalone: true,
-  template: `
-    <h1>Home Page</h1>
-  `,
-  styles: `
-    h1 {
-      color: red;
-    }
-  `,
-  encapsulation: ViewEncapsulation.None
-})
-export class HomeComponent {}
-```
-
-Result:
-
-The CSS behaves like global CSS.
-
-For example, the `h1` rule can affect headings outside the Home component.
-
-Be careful when using this because styles can accidentally affect other components.
-
-### D. ViewEncapsulation.ExperimentalIsolatedShadowDom
-
-Angular 21 also exposes an experimental encapsulation mode.
-
-typescript
-
-```typescript
-encapsulation: ViewEncapsulation.ExperimentalIsolatedShadowDom
-```
-
-It uses Shadow DOM while preventing external global styles from leaking into the component.
-
-This is useful for stronger isolation, but it is experimental. Avoid relying on it for production-critical functionality without evaluating its compatibility and limitations.
-
-### Encapsulation comparison
-
-| Mode | CSS isolation | Global styles enter? |
-| --- | --- | --- |
-| Emulated | Angular-emulated isolation | Yes |
-| ShadowDom | Native Shadow DOM | No, ordinary global CSS |
-| None | No isolation | Yes |
-| ExperimentalIsolatedShadowDom | Strong isolation | No |
-
-Angular documentation: [Angular 21 – Styling Components](<https://v21.angular.dev/guide/components/styling?utm_source=chatgpt.com>) and [ViewEncapsulation API](<https://angular.dev/api/core/ViewEncapsulation?utm_source=chatgpt.com>).
-
-## 8. Best practices for managing styles in large Angular applications
-
-When building enterprise-level Angular 21 applications, managing CSS properly is very important.
-
-I recommend the following folder structure:
-
-text
-
-```text
-src/
-│
-├── app/
-│   │
-│   ├── components/
-│   │   ├── header/
-│   │   │   ├── header.component.ts
-│   │   │   ├── header.component.html
-│   │   │   └── header.component.css
-│   │   │
-│   │   └── sidebar/
-│   │       ├── sidebar.component.ts
-│   │       ├── sidebar.component.html
-│   │       └── sidebar.component.css
-│   │
-│   ├── pages/
-│   │   ├── home/
-│   │   ├── login/
-│   │   └── dashboard/
-│   │
-│   └── app.ts
-│
-├── styles/
-│   ├── abstracts/
-│   │   ├── _variables.scss
-│   │   └── _mixins.scss
-│   │
-│   ├── base/
-│   │   ├── _reset.scss
-│   │   └── _typography.scss
-│   │
-│   ├── components/
-│   │   ├── _buttons.scss
-│   │   └── _forms.scss
-│   │
-│   ├── layout/
-│   │   ├── _header.scss
-│   │   └── _footer.scss
-│   │
-│   └── themes/
-│       ├── _light.scss
-│       └── _dark.scss
-│
-└── styles.scss
-```
-
-### Best practice 1: Keep component-specific CSS inside components
+Yes. Signals can store API loading states and response data.
 
 For example:
 
-text
+typescript
 
-```text
-login/
-  login.component.ts
-  login.component.html
-  login.component.css
-```
+```typescript
+loading = signal(false);
+users = signal<string[]>([]);
+error = signal('');
 
-Avoid putting every component's CSS inside the global stylesheet.
+loadUsers() {
+  this.loading.set(true);
 
-### Best practice 2: Keep common styles globally
-
-Examples:
-
-- Fonts.
-- Colors.
-- Typography.
-- CSS reset.
-- Common utility classes.
-- Theme variables.
-
-### Best practice 3: Use CSS variables
-
-Define common colors and dimensions in one place.
-
-css
-
-```css
-:root {
-  --primary-color: #1976d2;
-  --danger-color: #f44336;
-  --success-color: #4caf50;
-
-  --spacing-small: 8px;
-  --spacing-medium: 16px;
-  --spacing-large: 24px;
+  // API request goes here
 }
 ```
 
-Use them inside component CSS:
+You can use `@if` to display loading, success and error messages.
 
-css
+Q13. What is `computed()` in Angular?
 
-```css
-button {
-  background-color: var(--primary-color);
-  padding: var(--spacing-medium);
-}
-```
-
-### Best practice 4: Avoid ViewEncapsulation.None unless necessary
-
-Prefer the default `Emulated` mode.
-
-Use `None` only when you intentionally want component styles to become global.
-
-### Best practice 5: Avoid excessive use of \!important
-
-Avoid:
-
-css
-
-```css
-h1 {
-  color: red !important;
-}
-```
-
-Prefer proper CSS architecture and selector specificity.
-
-### Best practice 6: Use SCSS for larger projects
-
-SCSS supports variables, mixins, nesting and reusable stylesheet structures.
-
-Example:
-
-scss
-
-```scss
-$primary-color: #1976d2;
-
-@mixin primary-button {
-  background-color: $primary-color;
-  color: white;
-  padding: 10px 20px;
-  border: none;
-}
-
-button {
-  @include primary-button;
-}
-```
-
-Angular supports Sass and other CSS preprocessors.
-
-### Best practice 7: Avoid ::ng-deep
-
-Avoid using:
-
-css
-
-```css
-::ng-deep .some-class {
-  color: red;
-}
-```
-
-Angular strongly discourages new uses of `::ng-deep`.
-
-Instead, prefer:
-
-- Component inputs and CSS custom properties.
-- A documented global stylesheet for genuinely global overrides.
-- Supported styling APIs provided by third-party libraries.
-
-### Best practice 8: Organize styles by responsibility
-
-Don't create a single CSS file containing thousands of unrelated rules.
-
-Separate styles into logical groups such as:
-
-- Base.
-- Layout.
-- Components.
-- Utilities.
-- Themes.
-
-## 9. Which styling approach should you use?
-
-Here is a practical recommendation for Angular 21:
-
-| Requirement | Recommended approach |
-| --- | --- |
-| Application-wide font | Global CSS |
-| Application-wide colors | Global CSS variables |
-| Login page design | Component CSS |
-| Dashboard design | Component CSS |
-| Common buttons | Global CSS or reusable button component |
-| Dynamic text color | Angular style binding |
-| Dynamic background | Angular style binding |
-| Small component styles | Internal styles |
-| Large component styles | External CSS/SCSS |
-| Multiple global stylesheets | `angular.json` |
-| Multiple component stylesheets | `styleUrls` |
-| Strong native CSS isolation | ShadowDom |
-
-## 10. Important interview questions and answers
-
-Q1. What is the difference between global CSS and component CSS?
-
-Global CSS can apply throughout the application, whereas component CSS is normally scoped to its component using Angular's encapsulation mechanism.
-
-Q2. Can global CSS override component CSS?
-
-Yes. Global CSS can affect elements inside components using Emulated encapsulation. The winning declaration depends on specificity, source order and other CSS cascade rules.
-
-Q3. Can we use multiple CSS files in one component?
-
-Yes. Use the `styleUrls` property.
+`computed()` creates a read-only derived signal based on other signals.
 
 typescript
 
 ```typescript
-styleUrls: [
-  './home.css',
-  './responsive.css',
-  './theme.css'
-]
+price = signal(100);
+quantity = signal(2);
+
+total = computed(() =>
+  this.price() * this.quantity()
+);
 ```
-
-Q4. Can we use multiple global CSS files?
-
-Yes. Register multiple files in the `styles` array of `angular.json`.
-
-Q5. What is the default Angular encapsulation mode?
-
-`ViewEncapsulation.Emulated`.
-
-Q6. What happens when we use ViewEncapsulation.None?
-
-Angular disables component style encapsulation. The component's CSS behaves like global CSS.
-
-Q7. What is the difference between styleUrl and styleUrls?
-
-- `styleUrl`: One external stylesheet.
-- `styleUrls`: Multiple external stylesheets.
-
-Q8. Are component styles loaded when a lazy-loaded component is loaded?
-
-Yes. Angular associates component styles with the component, so they are included when the component is rendered, including lazy-loaded components.
-
-Q9. Are global styles inherited by child components?
-
-Global CSS selectors can match elements inside child components. However, CSS inheritance is different: properties such as `color` and `font-family` inherit naturally, while properties such as `margin` and `padding` do not.
-
-Q10. Does component CSS automatically apply to child component templates?
-
-No. With Emulated encapsulation, the parent's component CSS normally applies to its own template, not the internal template of its child component.
-
-## 11. Final summary
-
-## Angular 21 styling cheat sheet
-
-Component styling
-
-Local
-
-typescript
-
-```typescript
-styleUrl: './home.css'
-```
-
-Global styling
-
-Application-wide
-
-json
-
-```json
-"styles": [
-  "src/styles.css"
-]
-```
-
-Multiple component stylesheets
-
-typescript
-
-```typescript
-styleUrls: [
-  './home.css',
-  './responsive.css'
-]
-```
-
-Internal styles
-
-typescript
-
-```typescript
-styles: `
-  h1 { color: red; }
-`
-```
-
-Inline styles
 
 HTMLWrap linesCopy codePreview
 
 ```html
-<h1 style="color: red">Hello</h1>
+<p>Total: {{ total() }}</p>
 ```
 
-Default encapsulation
+Q14. What is the difference between `@if` and `[hidden]`?
 
-typescript
+- `@if`: Adds or removes the conditional view from the DOM.
+- `[hidden]`: Keeps the element in the DOM but applies the HTML hidden state.
 
-```typescript
-encapsulation: ViewEncapsulation.Emulated
-```
+Q15. Do we need to import CommonModule for `@if` in Angular 21?
 
-### Official Angular 21 documentation
+No. Built-in control flow syntax does not require `CommonModule`.
 
-For further learning, these are the most useful references:
+## 11. Practice Exercises
 
-1. [Styling Components – Angular 21](<https://v21.angular.dev/guide/components/styling?utm_source=chatgpt.com>)
-2. [Anatomy of Angular Components](<https://v21.angular.dev/guide/components?utm_source=chatgpt.com>)
-3. [Angular Component API](<https://angular.dev/api/core/Component?utm_source=chatgpt.com>)
-4. [ViewEncapsulation API](<https://angular.dev/api/core/ViewEncapsulation?utm_source=chatgpt.com>)
+Try these five exercises to strengthen your understanding.
 
-My recommendation: For a large Angular 21 application, use global SCSS/CSS for common design rules and component-level SCSS/CSS for individual component designs. Keep the default `ViewEncapsulation.Emulated` unless you have a specific reason to change it. This gives you a clean, reusable and maintainable styling architecture.
+Angular practice checklist
+
+0/5 completed
+
+[ ]Exercise 1: Create a button that shows and hides a paragraph.
+
+Create a boolean signal, toggle it using .update(), and use @if.
+
+[ ]Exercise 2: Create a login/logout application.
+
+Use a login status signal and @if/@else.
+
+[ ]Exercise 3: Create a dropdown with India, USA and UK options.
+
+Use a select element, change event and multiple @else if conditions.
+
+[ ]Exercise 4: Display Loading, Success and Error messages.
+
+Use a union type signal and @switch or @if/@else if.
+
+[ ]Exercise 5: Calculate total price dynamically.
+
+Use price and quantity signals with a computed() signal.
+
+## 12. Important Angular 21 Documentation
+
+For further learning, refer to the official Angular documentation:
+
+1. [Angular Control Flow – @if, @else, @switch and @for](<https://angular.dev/guide/templates/control-flow?utm_source=chatgpt.com>).
+2. [Angular Event Binding](<https://angular.dev/guide/templates/event-binding?utm_source=chatgpt.com>).
+3. [Angular 21 Template Expression Syntax](<https://v21.angular.dev/guide/templates/expression-syntax?utm_source=chatgpt.com>).
+4. [NgIf API and Deprecation Information](<https://angular.dev/api/common/NgIf?utm_source=chatgpt.com>).
+
+## Final Revision: What You Must Remember
+
+| Concept | Angular syntax |
+| --- | --- |
+| Conditional rendering | `@if` |
+| Alternative condition | `@else` |
+| Multiple conditions | `@else if` |
+| Multiple fixed values | `@switch` |
+| Individual switch condition | `@case` |
+| Default switch condition | `@default` |
+| Reactive state | `signal()` |
+| Update signal | `.set()` / `.update()` |
+| Derived state | `computed()` |
+| Button click | `(click)` |
+| Dropdown change | `(change)` |
+| Input change | `(input)` |
+| Hide visually | `[hidden]` |
+
+My recommendation: Learn `@if`, `@else if`, `@switch`, Signals and event binding together. These concepts form the foundation for building interactive Angular applications, handling API responses, and answering practical Angular interview questions.

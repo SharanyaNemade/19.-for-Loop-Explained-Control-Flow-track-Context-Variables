@@ -1,15 +1,25 @@
-import { Component, signal, WritableSignal } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { CSSRules } from './css-rules/css-rules';
-import { UserData } from './user-data/user-data';
+
 
 @Component({
-  imports: [RouterOutlet,CSSRules,UserData ],
+  imports: [RouterOutlet],
   selector: 'app-root',
   standalone: true,
   styleUrl: './app.css',
   templateUrl: './app.html',
 })
 export class App {
-  name:WritableSignal<string> = signal('')
+  isLogin = signal(false);
+  show = signal(true)
+  status = signal('error')
+
+  handleLogin(status:boolean){
+    this.isLogin.set(status)
+  }
+
+  handleStatus(event : Event){
+    let target =  event.target as HTMLSelectElement;
+    this.status.set(target.value)
+  }
 }
