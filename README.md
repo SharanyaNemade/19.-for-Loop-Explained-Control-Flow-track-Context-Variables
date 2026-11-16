@@ -1,79 +1,123 @@
 # Angular21Tutorial
 
-# Angular 21 – Control Flow and Conditional Rendering
 
-Control flow is one of the most important concepts in Angular. It allows developers to dynamically display, hide, or change elements based on conditions, application state, user interactions, and API responses.
 
-In Angular 21, we use the modern built-in control flow syntax:
 
-- `@if` – Conditional rendering.
-- `@else` – Alternative rendering.
-- `@else if` – Multiple conditional branches.
-- `@switch`, `@case`, `@default` – Multiple fixed-value conditions.
-- Signals – Reactive state management.
-- Event binding – Handling user interactions such as clicks and dropdown changes.
+# Angular 21: Complete Guide to `@for`, Signals, `track`, and Array Iteration
 
-Let's understand each concept with practical examples, step by step.
+Angular 21 uses the modern built-in control flow syntax introduced in Angular 17. The `@for` block is the recommended way to iterate over arrays in Angular templates.
 
-## 1. What is Control Flow in Angular?
+When combined with Angular Signals, `@for` makes it easier to build reactive lists, update collections, optimize rendering, and manage dynamic UI efficiently.
 
-Control flow determines which HTML elements or components should be rendered based on a particular condition.
+Let's cover each topic with practical examples, interview questions, and best practices.
 
-For example:
+## 1. What is `@for` in Angular 21?
 
-- Show Login if the user is not logged in.
-- Show Dashboard if the user is logged in.
-- Show a loading message while API data is loading.
-- Show success or error messages after submitting a form.
-- Show additional fields when a dropdown option is selected.
+`@for` is Angular's built-in template control flow syntax for looping through iterable collections, such as arrays.
 
-### Traditional Angular syntax vs Angular 21
+It replaces the older `*ngFor` structural directive.
 
-Earlier Angular applications commonly used structural directives:
+Old approach (`*ngFor`):
 
 HTMLWrap linesCopy codePreview
 
 ```html
-<div *ngIf="isLoggedIn">
-  Welcome User!
-</div>
-
-<div *ngIf="!isLoggedIn">
-  Please Login
-</div>
+<ul>
+  <li *ngFor="let user of users">
+    {{ user.name }}
+  </li>
+</ul>
 ```
 
-Modern Angular uses built-in control flow:
+Modern approach (`@for`):
 
 HTMLWrap linesCopy codePreview
 
 ```html
-@if (isLoggedIn) {
-  <div>Welcome User!</div>
-} @else {
-  <div>Please Login</div>
+<ul>
+  @for (user of users; track user.id) {
+    <li>{{ user.name }}</li>
+  }
+</ul>
+```
+
+### Key differences
+
+| Feature | `*ngFor` | `@for` |
+| --- | --- | --- |
+| Syntax | Structural directive | Built-in control flow |
+| Track | `trackBy` function | `track` expression |
+| Empty state | Separate `*ngIf` | `@empty` |
+| Import | `CommonModule` or `NgFor` | No directive import |
+| Performance | Depends on tracking | Efficient keyed reconciliation |
+
+Important: `@for` is built into Angular's template syntax. You don't need to import `NgFor` or `CommonModule` just to use it.
+
+## 2. Basic syntax of `@for`
+
+The general syntax is:
+
+HTMLWrap linesCopy codePreview
+
+```html
+@for (item of items; track item.id) {
+  <!-- HTML template -->
+} @empty {
+  <!-- Empty state -->
 }
 ```
 
-Important: `@if` and `@else` are built into Angular. You don't need to import `CommonModule` or `NgIf` to use them.
+There are three important parts:
 
-## 2. @if and @else Syntax in Angular 21
+- `item`: Current item in the iteration.
+- `items`: Array or iterable collection.
+- `track item.id`: Unique identifier Angular uses to track items.
 
-The basic syntax is:
+Example:
+
+typescript
+
+```typescript
+export class AppComponent {
+  users = [
+    { id: 1, name: 'Rahul' },
+    { id: 2, name: 'Priya' },
+    { id: 3, name: 'Amit' }
+  ];
+}
+```
+
+Template:
 
 HTMLWrap linesCopy codePreview
 
 ```html
-@if (condition) {
-  <!-- HTML when condition is true -->
-} @else {
-  <!-- HTML when condition is false -->
+@for (user of users; track user.id) {
+  <p>{{ user.name }}</p>
+} @empty {
+  <p>No users found.</p>
 }
 ```
 
-### Example: Login status
+Output:
 
-app.component.ts
+text
+
+```text
+Rahul
+Priya
+Amit
+```
+
+## 3. Using `@for` with Angular Signals
+
+This is one of the most important concepts in modern Angular.
+
+A Signal is a reactive container that notifies Angular when its value changes.
+
+To create a writable signal, use Angular's `signal()` function.
+
+### Component TypeScript
 
 typescript
 
@@ -81,177 +125,297 @@ typescript
 import { Component, signal } from '@angular/core';
 
 @Component({
-  selector: 'app-root',
+  selector: 'app-users',
   standalone: true,
-  templateUrl: './app.component.html'
+  templateUrl: './users.component.html'
 })
-export class AppComponent {
+export class UsersComponent {
 
-  isLoggedIn = signal(false);
+  users = signal([
+    { id: 1, name: 'Rahul' },
+    { id: 2, name: 'Priya' },
+    { id: 3, name: 'Amit' }
+  ]);
 
 }
 ```
 
-app.component.html
+### HTML template
 
 HTMLWrap linesCopy codePreview
 
 ```html
-@if (isLoggedIn()) {
-  <h2>Welcome to Dashboard!</h2>
-} @else {
-  <h2>Please Login First</h2>
-}
+<ul>
+  @for (user of users(); track user.id) {
+    <li>{{ user.name }}</li>
+  }
+</ul>
 ```
 
-Here:
+Important: You must call `users()` to read the signal value.
 
-- `signal(false)` creates a reactive boolean value.
-- `isLoggedIn()` reads the signal value.
-- If the value is `true`, Angular displays the dashboard message.
-- If the value is `false`, Angular displays the login message.
+- `users` refers to the signal itself.
+- `users()` returns the current array.
+- `users.set()` replaces the entire array.
+- `users.update()` updates the array based on its previous value.
 
-## 3. Conditional Rendering with Signals
-
-Signals are a reactive state management feature in Angular.
-
-A signal stores a value and notifies Angular when that value changes.
-
-### Example
-
-app.component.ts
+### Adding an item
 
 typescript
 
 ```typescript
-import { Component, signal } from '@angular/core';
-
-@Component({
-  selector: 'app-root',
-  standalone: true,
-  templateUrl: './app.component.html'
-})
-export class AppComponent {
-
-  count = signal(0);
-
-  increment() {
-    this.count.update(value => value + 1);
-  }
-
-  decrement() {
-    this.count.update(value => value - 1);
-  }
-
+addUser() {
+  this.users.update(users => [
+    ...users,
+    {
+      id: 4,
+      name: 'Sneha'
+    }
+  ]);
 }
 ```
 
-app.component.html
-
-HTMLWrap linesCopy codePreview
-
-```html
-<h2>Count: {{ count() }}</h2>
-
-<button (click)="increment()">Increment</button>
-
-<button (click)="decrement()">Decrement</button>
-
-@if (count() > 0) {
-  <p>Count is positive</p>
-} @else if (count() === 0) {
-  <p>Count is zero</p>
-} @else {
-  <p>Count is negative</p>
-}
-```
-
-How does it work?
-
-1. Initially, count is 0.
-2. Click Increment.
-3. Count becomes 1.
-4. Angular detects the signal update.
-5. The appropriate conditional block is rendered.
-
-Interview tip Signals are read by calling them as functions, such as `count()`. Use `.set()` to replace a value and `.update()` to calculate a new value from the existing one.
-
-## 4. Toggle Show/Hide Elements
-
-One of the most common real-world use cases is showing and hiding elements when a user clicks a button.
-
-### TypeScript
+### Removing an item
 
 typescript
 
 ```typescript
-import { Component, signal } from '@angular/core';
-
-@Component({
-  selector: 'app-root',
-  standalone: true,
-  templateUrl: './app.component.html'
-})
-export class AppComponent {
-
-  isVisible = signal(false);
-
-  toggleVisibility() {
-    this.isVisible.update(value => !value);
-  }
-
+removeUser(id: number) {
+  this.users.update(users =>
+    users.filter(user => user.id !== id)
+  );
 }
 ```
 
-### HTML
+### Updating an item
+
+typescript
+
+```typescript
+updateUser(id: number) {
+  this.users.update(users =>
+    users.map(user =>
+      user.id === id
+        ? { ...user, name: 'Updated Name' }
+        : user
+    )
+  );
+}
+```
+
+### Complete template
 
 HTMLWrap linesCopy codePreview
 
 ```html
-<button (click)="toggleVisibility()">
-  {{ isVisible() ? 'Hide Details' : 'Show Details' }}
-</button>
+<button (click)="addUser()">Add User</button>
 
-@if (isVisible()) {
+@for (user of users(); track user.id) {
   <div>
-    <h3>Angular 21</h3>
-    <p>Welcome to conditional rendering!</p>
+    {{ user.name }}
+
+    <button (click)="removeUser(user.id)">
+      Delete
+    </button>
+  </div>
+} @empty {
+  <p>No users available.</p>
+}
+```
+
+What happens when a signal changes?
+
+1. You update the signal using `.set()` or `.update()`.
+2. Angular detects that the signal has changed.
+3. The template that reads the signal is notified.
+4. Angular reconciles the collection with the existing views.
+5. Only the necessary DOM changes are performed.
+
+This is the benefit of combining Signals with `@for`.
+
+Angular
+
++1
+
+## 4. Using `track` for better performance
+
+The `track` expression is one of the most important features of `@for`.
+
+It tells Angular how to identify each item in a collection.
+
+Consider this example:
+
+typescript
+
+```typescript
+products = signal([
+  { id: 101, name: 'Laptop', price: 50000 },
+  { id: 102, name: 'Mobile', price: 20000 },
+  { id: 103, name: 'Tablet', price: 30000 }
+]);
+```
+
+Use:
+
+HTMLWrap linesCopy codePreview
+
+```html
+@for (product of products(); track product.id) {
+  <div>
+    {{ product.name }} - {{ product.price }}
   </div>
 }
 ```
 
-Output behavior:
+### Why is `track product.id` important?
 
-| Action | Result |
+Imagine you have 1,000 products and add one new product.
+
+Without a reliable tracking strategy, Angular may have difficulty identifying which existing views correspond to which data items.
+
+With `track product.id`, Angular can identify items using their unique IDs and efficiently reconcile the DOM.
+
+For example:
+
+Before updating
+
+1Laptop
+
+2Mobile
+
+3Tablet
+
+After adding a product
+
+1Laptop
+
+2Mobile
+
+3Tablet
+
+4MonitorNew item
+
+Conceptual illustration: existing items retain their identity; the new item gets a new view.
+
+### Different ways to use `track`
+
+| Syntax | When to use |
 | --- | --- |
-| Initial page load | Details hidden |
-| Click Show Details | Details displayed |
-| Click Hide Details | Details removed |
+| `track item.id` | Recommended for objects |
+| `track item.uuid` | When using UUIDs |
+| `track item` | When object identity is stable |
+| `track $index` | Static collections |
 
-Remember: `@if` removes the conditional content from the DOM when its condition becomes false. It does not merely make the element invisible.
-
-If you want to keep an element in the DOM and only hide it visually, use CSS:
+Best practice:
 
 HTMLWrap linesCopy codePreview
 
 ```html
-<div [hidden]="!isVisible()">
-  This element is hidden visually.
-</div>
+@for (product of products(); track product.id) {
+  <app-product-card [product]="product" />
+}
 ```
 
-## 5. Multiple Conditions: Not Started, In Progress, Success, Error
+Use a unique, stable identifier whenever possible.
 
-This is a very important real-time application example.
+Angular's documentation explains that `track` helps minimize DOM operations and improve rendering performance.
 
-Imagine an application that submits data to an API. Depending on the response, we need to display different messages.
+Angular
 
-We have four states:
++1
 
-- `notStarted`
-- `inProgress`
-- `success`
-- `error`
+## 5. Why should `$index` be avoided in `track`?
+
+This is a common Angular interview question.
+
+Consider:
+
+HTMLWrap linesCopy codePreview
+
+```html
+@for (user of users(); track $index) {
+  <div>{{ user.name }}</div>
+}
+```
+
+Here Angular identifies items by their position rather than their actual identity.
+
+Suppose the array contains:
+
+| Index | User |
+| --- | --- |
+| 0 | Rahul |
+| 1 | Priya |
+| 2 | Amit |
+
+Now remove Rahul.
+
+| New index | User |
+| --- | --- |
+| 0 | Priya |
+| 1 | Amit |
+
+The index-based tracking keys remain 0 and 1 for the first two positions, even though the users occupying those positions have changed.
+
+This can cause Angular to reuse existing views for different logical records.
+
+For example, imagine each row contains:
+
+- An input field.
+- A checkbox.
+- An expanded/collapsed state.
+- A child component with internal state.
+
+The UI state may become associated with the wrong user when the collection changes.
+
+### Better approach
+
+HTMLWrap linesCopy codePreview
+
+```html
+@for (user of users(); track user.id) {
+  <div>
+    {{ user.name }}
+  </div>
+}
+```
+
+### When is `$index` acceptable?
+
+It is perfectly acceptable when:
+
+- The collection is static.
+- Items are never inserted or removed.
+- Items are never reordered.
+- The identity of each item is irrelevant.
+
+For example:
+
+typescript
+
+```typescript
+days = ['Monday', 'Tuesday', 'Wednesday'];
+```
+
+HTMLWrap linesCopy codePreview
+
+```html
+@for (day of days; track $index) {
+  <p>{{ day }}</p>
+}
+```
+
+Interview takeaway: Avoid `$index` for dynamic collections because indexes represent positions, not stable item identities. It is not universally bad; it is appropriate for genuinely static lists.
+
+Angular
+
++1
+
+## 6. Looping over arrays of objects
+
+In real-world applications, you will mostly work with arrays of objects received from APIs.
+
+Example: Employee management system.
 
 ### TypeScript
 
@@ -260,36 +424,40 @@ typescript
 ```typescript
 import { Component, signal } from '@angular/core';
 
-type Status =
-  | 'notStarted'
-  | 'inProgress'
-  | 'success'
-  | 'error';
+interface Employee {
+  id: number;
+  name: string;
+  department: string;
+  salary: number;
+}
 
 @Component({
-  selector: 'app-root',
+  selector: 'app-employees',
   standalone: true,
-  templateUrl: './app.component.html'
+  templateUrl: './employees.html'
 })
-export class AppComponent {
+export class EmployeesComponent {
 
-  status = signal<Status>('notStarted');
-
-  startProcess() {
-    this.status.set('inProgress');
-
-    setTimeout(() => {
-      this.status.set('success');
-    }, 2000);
-  }
-
-  reset() {
-    this.status.set('notStarted');
-  }
-
-  showError() {
-    this.status.set('error');
-  }
+  employees = signal<Employee[]>([
+    {
+      id: 1,
+      name: 'Rahul',
+      department: 'IT',
+      salary: 50000
+    },
+    {
+      id: 2,
+      name: 'Priya',
+      department: 'HR',
+      salary: 45000
+    },
+    {
+      id: 3,
+      name: 'Amit',
+      department: 'Finance',
+      salary: 60000
+    }
+  ]);
 
 }
 ```
@@ -299,220 +467,492 @@ export class AppComponent {
 HTMLWrap linesCopy codePreview
 
 ```html
-<h2>API Status Example</h2>
+<h2>Employee List</h2>
 
-<button
-  (click)="startProcess()"
-  [disabled]="status() === 'inProgress'">
-  Start Process
-</button>
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Name</th>
+      <th>Department</th>
+      <th>Salary</th>
+    </tr>
+  </thead>
 
-<button (click)="showError()">
-  Simulate Error
-</button>
-
-<button (click)="reset()">
-  Reset
-</button>
-
-@if (status() === 'notStarted') {
-  <p>Process has not started yet.</p>
-}
-
-@else if (status() === 'inProgress') {
-  <p>Loading... Please wait.</p>
-}
-
-@else if (status() === 'success') {
-  <p>Data submitted successfully!</p>
-}
-
-@else if (status() === 'error') {
-  <p>Something went wrong!</p>
-}
+  <tbody>
+    @for (employee of employees(); track employee.id) {
+      <tr>
+        <td>{{ employee.id }}</td>
+        <td>{{ employee.name }}</td>
+        <td>{{ employee.department }}</td>
+        <td>{{ employee.salary }}</td>
+      </tr>
+    } @empty {
+      <tr>
+        <td colspan="4">No employees found.</td>
+      </tr>
+    }
+  </tbody>
+</table>
 ```
 
-### Understanding the flow
-
-## API status flow
-
-Not Started
-
-Initial state
-
-In Progress
-
-API request running
-
-Success
-
-Request completed
-
-Error
-
-Request failed
-
-Interview point: Use `@if` and `@else if` when conditions involve different logical expressions. Use `@switch` when comparing one variable against multiple fixed values.
-
-### Alternative: Using @switch
-
-The same example can be written using `@switch`.
+Notice that we use:
 
 HTMLWrap linesCopy codePreview
 
 ```html
-@switch (status()) {
+track employee.id
+```
 
-  @case ('notStarted') {
-    <p>Process not started.</p>
-  }
+Each employee has a unique ID, so Angular can efficiently identify the employee when the array changes.
 
-  @case ('inProgress') {
-    <p>Loading...</p>
-  }
+## 7. Context variables in `@for`
 
-  @case ('success') {
-    <p>Success!</p>
-  }
+Angular provides six built-in contextual variables inside an `@for` block.
 
-  @case ('error') {
-    <p>Error occurred!</p>
-  }
+| Variable | Description |
+| --- | --- |
+| `$index` | Current item's zero-based index |
+| `$first` | True if it is the first item |
+| `$last` | True if it is the last item |
+| `$even` | True if index is even |
+| `$odd` | True if index is odd |
+| `$count` | Total number of items |
 
-  @default {
-    <p>Unknown status.</p>
-  }
+### Example
 
+HTMLWrap linesCopy codePreview
+
+```html
+@for (user of users(); track user.id) {
+  <div>
+    Name: {{ user.name }}
+
+    Index: {{ $index }}
+
+    First: {{ $first }}
+
+    Last: {{ $last }}
+
+    Even: {{ $even }}
+
+    Odd: {{ $odd }}
+
+    Total: {{ $count }}
+  </div>
 }
 ```
 
-`@switch` uses strict equality (`===`) and does not fall through between cases.
+### Expected output
+
+For three users:
+
+| Name | `$index` | `$first` | `$last` | `$even` | `$odd` | `$count` |
+| --- | --- | --- | --- | --- | --- | --- |
+| Rahul | 0 | true | false | true | false | 3 |
+| Priya | 1 | false | false | false | true | 3 |
+| Amit | 2 | false | true | true | false | 3 |
+
+Remember that `$even` and `$odd` are based on the zero-based index.
+
+### Aliasing contextual variables
+
+You can give contextual variables custom names using `let`.
+
+HTMLWrap linesCopy codePreview
+
+```html
+@for (
+  user of users();
+  track user.id;
+  let i = $index,
+      first = $first,
+      last = $last
+) {
+  <div>
+    {{ i }} - {{ user.name }}
+
+    @if (first) {
+      <span>First User</span>
+    }
+
+    @if (last) {
+      <span>Last User</span>
+    }
+  </div>
+}
+```
+
+This is particularly useful when working with nested loops.
 
 Angular
 
-## 6. Dropdown-Based Conditional Rendering
++1
 
-This is another frequently asked Angular interview and practical development question.
+## 8. Styling odd and even rows
 
-Requirement: When the user selects a country, display the corresponding information.
+You can use `$even` and `$odd` to apply different CSS classes to rows.
 
-## Interactive country dropdown
+This is useful for:
 
-Select a country to see conditional rendering in action.
+- Employee tables.
+- Product lists.
+- Order history.
+- Reports.
+- Data grids.
 
- India # 🇮🇳 India
+### HTML
 
-Capital: New Delhi
+HTMLWrap linesCopy codePreview
 
-Currency: Indian Rupee (INR)
+```html
+<table>
+  @for (employee of employees(); track employee.id) {
+    <tr
+      [class.even-row]="$even"
+      [class.odd-row]="$odd">
 
-### Actual Angular implementation
+      <td>{{ employee.name }}</td>
+      <td>{{ employee.department }}</td>
 
-app.component.ts
+    </tr>
+  }
+</table>
+```
+
+### CSS
+
+css
+
+```css
+.even-row {
+  background-color: #f2f2f2;
+}
+
+.odd-row {
+  background-color: #ffffff;
+}
+
+tr:hover {
+  background-color: #dbeafe;
+}
+```
+
+Example output
+
+Rahul
+
+IT
+
+Priya
+
+HR
+
+Amit
+
+Finance
+
+Sneha
+
+Sales
+
+Illustration of alternating row colors.
+
+### Alternative: Using `ngClass`
+
+You can also use `ngClass`, but it requires importing `NgClass` or `CommonModule`.
+
+HTMLWrap linesCopy codePreview
+
+```html
+<tr [ngClass]="{
+  'even-row': $even,
+  'odd-row': $odd
+}">
+```
+
+For simple styling, `[class.className]` is generally cleaner.
+
+## 9. Nested `@for` loops
+
+Sometimes you need to iterate over an array inside another array.
+
+Example: Departments containing employees.
+
+### TypeScript
 
 typescript
 
 ```typescript
-import { Component, signal } from '@angular/core';
+departments = signal([
+  {
+    id: 1,
+    name: 'IT',
+    employees: [
+      { id: 101, name: 'Rahul' },
+      { id: 102, name: 'Amit' }
+    ]
+  },
+  {
+    id: 2,
+    name: 'HR',
+    employees: [
+      { id: 103, name: 'Priya' },
+      { id: 104, name: 'Sneha' }
+    ]
+  }
+]);
+```
 
-@Component({
-  selector: 'app-root',
-  standalone: true,
-  templateUrl: './app.component.html'
-})
-export class AppComponent {
+### HTML
 
-  selectedCountry = signal('India');
+HTMLWrap linesCopy codePreview
 
-  onCountryChange(event: Event) {
-    const value = (event.target as HTMLSelectElement).value;
+```html
+@for (department of departments(); track department.id) {
 
-    this.selectedCountry.set(value);
+  <h2>{{ department.name }}</h2>
+
+  @for (employee of department.employees; track employee.id) {
+    <p>{{ employee.name }}</p>
   }
 
 }
 ```
 
-app.component.html
+Output:
+
+text
+
+```text
+IT
+  Rahul
+  Amit
+
+HR
+  Priya
+  Sneha
+```
+
+### Accessing outer loop variables
+
+Use aliases to avoid confusion between inner and outer loop variables.
 
 HTMLWrap linesCopy codePreview
 
 ```html
-<h2>Select Country</h2>
+@for (
+  department of departments();
+  track department.id;
+  let deptIndex = $index
+) {
+  <h2>
+    Department {{ deptIndex + 1 }}:
+    {{ department.name }}
+  </h2>
 
-<select
-  [value]="selectedCountry()"
-  (change)="onCountryChange($event)">
-
-  <option value="India">India</option>
-  <option value="USA">USA</option>
-  <option value="UK">UK</option>
-
-</select>
-
-@if (selectedCountry() === 'India') {
-  <p>Welcome to India</p>
-}
-@else if (selectedCountry() === 'USA') {
-  <p>Welcome to USA</p>
-}
-@else if (selectedCountry() === 'UK') {
-  <p>Welcome to UK</p>
+  @for (
+    employee of department.employees;
+    track employee.id;
+    let empIndex = $index
+  ) {
+    <p>
+      {{ deptIndex }} - {{ empIndex }}:
+      {{ employee.name }}
+    </p>
+  }
 }
 ```
 
-What happens internally?
+This is especially useful in complex nested tables and hierarchical menus.
 
-1. User selects a country.
-2. The `(change)` event executes.
-3. `$event` provides the DOM event object.
-4. We retrieve the selected dropdown value.
-5. The signal is updated using `.set()`.
-6. Angular updates the conditional content.
+## 10. Common mistakes developers make with `@for`
 
-## 7. Handling DOM Events Properly
+These are important for real-world Angular development and interviews.
 
-Angular provides event binding using parentheses `()`.
+### Mistake 1: Forgetting parentheses when reading signals
 
-General syntax:
+IncorrectHTMLWrap linesCopy codePreview
+
+```html
+@for (user of users; track user.id) {
+  {{ user.name }}
+}
+```
+
+CorrectHTMLWrap linesCopy codePreview
+
+```html
+@for (user of users(); track user.id) {
+  {{ user.name }}
+}
+```
+
+A signal must be read by calling it.
+
+### Mistake 2: Using a non-unique tracking property
+
+IncorrectHTMLWrap linesCopy codePreview
+
+```html
+@for (user of users(); track user.name) {
+  {{ user.name }}
+}
+```
+
+Two users might have the same name.
+
+CorrectHTMLWrap linesCopy codePreview
+
+```html
+@for (user of users(); track user.id) {
+  {{ user.name }}
+}
+```
+
+Use a unique identifier.
+
+### Mistake 3: Mutating the signal array directly
+
+Incorrecttypescript
+
+```typescript
+this.users().push({
+  id: 4,
+  name: 'Sneha'
+});
+```
+
+This mutates the existing array without notifying the signal that its value has changed.
+
+Correcttypescript
+
+```typescript
+this.users.update(users => [
+  ...users,
+  {
+    id: 4,
+    name: 'Sneha'
+  }
+]);
+```
+
+### Mistake 4: Using `$index` for dynamic data
+
+Incorrect for dynamic collectionsHTMLWrap linesCopy codePreview
+
+```html
+@for (user of users(); track $index) {
+  <app-user [user]="user" />
+}
+```
+
+CorrectHTMLWrap linesCopy codePreview
+
+```html
+@for (user of users(); track user.id) {
+  <app-user [user]="user" />
+}
+```
+
+### Mistake 5: Forgetting the empty state
+
+Instead of separately checking whether the array is empty, use `@empty`.
 
 HTMLWrap linesCopy codePreview
 
 ```html
-<button (click)="methodName()">
-  Click Me
-</button>
+@for (user of users(); track user.id) {
+  <p>{{ user.name }}</p>
+} @empty {
+  <p>No records available.</p>
+}
 ```
 
-Some commonly used DOM events:
+### Mistake 6: Using duplicate IDs
 
-| Event | Purpose |
+typescript
+
+```typescript
+users = signal([
+  { id: 1, name: 'Rahul' },
+  { id: 1, name: 'Amit' }
+]);
+```
+
+Tracking keys should be unique within the collection. Duplicate keys can cause rendering errors and incorrect reconciliation.
+
+### Mistake 7: Expecting `@for` to support `break` and `continue`
+
+Angular's `@for` does not support JavaScript's flow-modifying `break` and `continue` statements.
+
+Instead, filter the collection before rendering.
+
+typescript
+
+```typescript
+activeUsers = computed(() =>
+  this.users().filter(user => user.active)
+);
+```
+
+HTMLWrap linesCopy codePreview
+
+```html
+@for (user of activeUsers(); track user.id) {
+  <p>{{ user.name }}</p>
+}
+```
+
+## 11. Best practices with Angular Signals and `@for`
+
+Here are the practices I recommend for production applications.
+
+| Best practice | Reason |
 | --- | --- |
-| `(click)` | Button click |
-| `(change)` | Dropdown or input change |
-| `(input)` | Input value changes |
-| `(keyup)` | Keyboard key released |
-| `(keydown)` | Keyboard key pressed |
-| `(mouseover)` | Mouse enters element |
-| `(submit)` | Form submission |
+| Use `signal()` for reactive state | Makes state changes observable |
+| Use `track item.id` | Stable item identity |
+| Use `.update()` for array updates | Avoids direct mutation |
+| Use `computed()` for derived lists | Keeps derived state synchronized |
+| Use `@empty` | Handles empty collections |
+| Use `$even` and `$odd` | Simplifies alternating styles |
+| Use aliases in nested loops | Improves readability |
+| Keep IDs unique | Prevents tracking conflicts |
+| Avoid unnecessary computed state | Reduces complexity |
 
-### Example: Input-based conditional rendering
+### Example: Search and filter using Signals
+
+This is a common real-world interview scenario.
 
 TypeScript
 
 typescript
 
 ```typescript
-import { Component, signal } from '@angular/core';
+import { Component, signal, computed } from '@angular/core';
 
 @Component({
-  selector: 'app-root',
+  selector: 'app-products',
   standalone: true,
-  templateUrl: './app.component.html'
+  templateUrl: './products.html'
 })
-export class AppComponent {
+export class ProductsComponent {
 
-  username = signal('');
+  searchText = signal('');
+
+  products = signal([
+    { id: 1, name: 'Laptop', price: 50000 },
+    { id: 2, name: 'Mobile', price: 20000 },
+    { id: 3, name: 'Tablet', price: 30000 }
+  ]);
+
+  filteredProducts = computed(() => {
+    const search = this.searchText().toLowerCase();
+
+    return this.products().filter(product =>
+      product.name.toLowerCase().includes(search)
+    );
+  });
 
 }
 ```
@@ -524,523 +964,214 @@ HTMLWrap linesCopy codePreview
 ```html
 <input
   type="text"
-  placeholder="Enter username"
-  (input)="username.set($any($event.target).value)"
+  placeholder="Search products..."
+  [value]="searchText()"
+  (input)="searchText.set($any($event.target).value)"
 />
 
-@if (username().length > 0) {
-  <p>Hello, {{ username() }}!</p>
-}
-@else {
-  <p>Please enter your username.</p>
-}
-```
-
-Here, `$event` represents the event object, and `$event.target` represents the element that triggered the event.
-
-For better type safety, you can also handle the event in a TypeScript method, as demonstrated in the dropdown example.
-
-Angular event binding documentation: [Event binding – Angular official documentation](<https://angular.dev/guide/templates/event-binding?utm_source=chatgpt.com>).
-
-## 8. Common Developer Mistakes in Angular Conditional Rendering
-
-These are common mistakes that developers should avoid.
-
-### Mistake 1: Forgetting parentheses when reading a signal
-
-IncorrectHTMLWrap linesCopy codePreview
-
-```html
-@if (isLoggedIn) {
-  <p>Welcome!</p>
+@for (product of filteredProducts(); track product.id) {
+  <div>
+    {{ product.name }} - {{ product.price }}
+  </div>
+} @empty {
+  <p>No matching products found.</p>
 }
 ```
 
-CorrectHTMLWrap linesCopy codePreview
+### How does this work?
 
-```html
-@if (isLoggedIn()) {
-  <p>Welcome!</p>
-}
-```
+1. The user types into the search input.
+2. `searchText` is updated.
+3. `computed()` recalculates the filtered products.
+4. Angular updates the template that reads `filteredProducts()`.
+5. `@for` reconciles the filtered collection using product IDs.
 
-A signal must be called to read its current value.
+Notice that we don't manually subscribe to anything or manually refresh the template.
 
-### Mistake 2: Using assignment instead of comparison
+This is a good example of combining Signals, computed state, and `@for`.
 
-IncorrectHTMLWrap linesCopy codePreview
+Angular
 
-```html
-@if (status = 'success') {
-  <p>Success!</p>
-}
-```
++1
 
-CorrectHTMLWrap linesCopy codePreview
+## 12. Angular 21 interview questions on `@for`
 
-```html
-@if (status() === 'success') {
-  <p>Success!</p>
-}
-```
+Here are 15 important interview questions with answers.
 
-Use comparison operators when checking conditions.
+### Basic interview questions
 
-### Mistake 3: Using multiple independent conditions unnecessarily
+Q1. What is `@for` in Angular?
 
-If only one state should be displayed at a time, prefer an `@if` / `@else if` chain.
+`@for` is a built-in control flow block used to iterate over arrays and other JavaScript iterables in Angular templates. It replaces the traditional `*ngFor` syntax.
+
+Q2. Is `@for` available in Angular 21?
+
+Yes. It was introduced in Angular 17 and is available in Angular 21. `NgFor` has been deprecated since Angular 20.
+
+Q3. What is the purpose of `track`?
+
+It identifies collection items so Angular can efficiently reconcile existing DOM views when a collection changes.
+
+Q4. Is `track` mandatory?
+
+Generally, yes. An exception exists for certain signal-based component scenarios where the iterable consists of signals.
+
+Q5. What is the difference between `track item.id` and `track $index`?
+
+- `track item.id`: Tracks items using stable identity.
+- `track $index`: Tracks items using their positions.
+
+Use IDs for dynamic collections.
+
+Q6. What is `@empty`?
+
+It defines a fallback template that renders when the collection has no items.
 
 HTMLWrap linesCopy codePreview
 
 ```html
-@if (status() === 'loading') {
-  <p>Loading...</p>
-} @else if (status() === 'success') {
-  <p>Success!</p>
-} @else {
-  <p>Something else.</p>
+@for (user of users(); track user.id) {
+  {{ user.name }}
+} @empty {
+  No users found.
 }
 ```
 
-Separate `@if` blocks are independent and can render multiple sections simultaneously.
+### Intermediate interview questions
 
-### Mistake 4: Incorrectly accessing dropdown values
+Q7. Can we use Signals with `@for`?
 
-IncorrectHTMLWrap linesCopy codePreview
-
-```html
-<select (change)="selectedCountry.set($event)">
-```
-
-The event object is not the selected string value.
-
-Correcttypescript
-
-```typescript
-onCountryChange(event: Event) {
-  const value = (event.target as HTMLSelectElement).value;
-  this.selectedCountry.set(value);
-}
-```
-
-### Mistake 5: Using `@if` when you only want visual hiding
-
-`@if` destroys and recreates the conditional view when the condition changes.
-
-If you only want to hide the element visually, consider:
+Yes. Read the signal using its getter.
 
 HTMLWrap linesCopy codePreview
 
 ```html
-<div [hidden]="!showDetails()">
-  Additional Information
-</div>
-```
-
-### Mistake 6: Putting too much business logic inside HTML
-
-Avoid complicated expressions:
-
-HTMLWrap linesCopy codePreview
-
-```html
-@if (user() && user().age >= 18 &&
-     user().isActive && user().role === 'admin') {
-  <p>Admin Access</p>
+@for (user of users(); track user.id) {
+  {{ user.name }}
 }
 ```
 
-Prefer a computed signal.
+Q8. What happens when a Signal array changes?
 
-typescript
+Angular notifies consumers of the changed signal and reconciles the affected template views.
 
-```typescript
-import { computed, signal } from '@angular/core';
+Q9. What is `$index`?
 
-user = signal({
-  age: 25,
-  isActive: true,
-  role: 'admin'
-});
+It represents the zero-based index of the current iteration.
 
-isAdmin = computed(() => {
-  const u = this.user();
+Q10. What is the difference between `$even` and `$odd`?
 
-  return u.age >= 18 &&
-         u.isActive &&
-         u.role === 'admin';
-});
-```
+- `$even`: True when the current index is even.
+- `$odd`: True when the current index is odd.
 
-HTMLWrap linesCopy codePreview
+Q11. Can we use nested `@for` loops?
 
-```html
-@if (isAdmin()) {
-  <p>Admin Access</p>
-}
-```
+Yes. You can use nested loops to display hierarchical or multidimensional data.
 
-This makes your application easier to maintain.
+Q12. Can we use `break` and `continue` inside `@for`?
 
-### Mistake 7: Not handling API loading, success and error states
+No. Angular's `@for` does not support these statements.
 
-Don't display an empty page while waiting for API responses.
+### Advanced interview questions
 
-Always consider:
+Q13. What happens if two objects have the same tracking ID?
 
-- Loading state.
-- Success state.
-- Error state.
-- Empty data state.
+Duplicate tracking keys can cause Angular to report a tracking error and lead to incorrect view reconciliation.
 
-These states improve user experience and make applications easier to debug.
+Q14. What is the difference between `signal()` and `computed()`?
 
-## 9. Real-Time Practical Example: Login and Dashboard
-
-Let's combine the concepts into one practical Angular 21 example.
-
-Requirement:
-
-- Initially display Login.
-- When the user clicks Login, display Dashboard.
-- When the user clicks Logout, return to Login.
-- Display different content based on login status.
-
-app.component.ts
-
-typescript
-
-```typescript
-import { Component, signal } from '@angular/core';
-
-@Component({
-  selector: 'app-root',
-  standalone: true,
-  templateUrl: './app.component.html'
-})
-export class AppComponent {
-
-  isLoggedIn = signal(false);
-
-  login() {
-    this.isLoggedIn.set(true);
-  }
-
-  logout() {
-    this.isLoggedIn.set(false);
-  }
-
-}
-```
-
-app.component.html
-
-HTMLWrap linesCopy codePreview
-
-```html
-<div>
-
-  <h1>Angular 21 Application</h1>
-
-  @if (isLoggedIn()) {
-
-    <h2>Welcome to Dashboard</h2>
-
-    <p>You are successfully logged in.</p>
-
-    <button (click)="logout()">
-      Logout
-    </button>
-
-  } @else {
-
-    <h2>Login Page</h2>
-
-    <p>Please login to continue.</p>
-
-    <button (click)="login()">
-      Login
-    </button>
-
-  }
-
-</div>
-```
-
-This example demonstrates four important Angular concepts:
-
-1. Signals for managing state.
-2. `@if` and `@else` for conditional rendering.
-3. Event binding using `(click)`.
-4. Updating the UI automatically when state changes.
-
-Note: This is a UI demonstration, not production authentication. A real login must validate credentials with a backend and enforce authorization on the server.
-
-## 10. Angular 21 Interview Questions and Answers
-
-Here are important interview questions, from beginner to advanced level.
-
-### Beginner-level questions
-
-Q1. What is control flow in Angular?
-
-Control flow determines which HTML elements or components should be displayed based on conditions.
-
-Angular provides built-in control flow blocks such as:
-
-- `@if`
-- `@else`
-- `@else if`
-- `@switch`
-- `@case`
-- `@default`
-- `@for`
-
-Q2. What is the difference between `@if` and `*ngIf`?
-
-| `@if` | `*ngIf` |
+| `signal()` | `computed()` |
 | --- | --- |
-| Built-in control flow | Structural directive |
-| No import required | Requires NgIf/CommonModule |
-| Modern Angular syntax | Older syntax |
-| Recommended for new code | Deprecated since Angular 20 |
+| Stores writable state | Derives state |
+| Can use `.set()` | Read-only |
+| Can use `.update()` | Automatically recalculates |
+| Used for source data | Used for filtered or calculated data |
 
-Q3. What is the purpose of `@else`?
+Q15. Why should we prefer Signals with `@for`?
 
-It executes an alternative template when the `@if` condition is false.
+Signals provide reactive state management, while `@for` efficiently manages collection rendering. Together they provide a clean approach to building reactive Angular applications.
 
-HTMLWrap linesCopy codePreview
+## 13. Important Angular 21 concepts to remember
 
-```html
-@if (isLoggedIn()) {
-  <p>Welcome!</p>
-} @else {
-  <p>Please login.</p>
-}
-```
+## Angular 21 revision sheet
 
-Q4. Can we use multiple `@else if` conditions?
+`@for`
 
-Yes. Angular supports multiple `@else if` branches.
+Built-in control flow
 
-HTMLWrap linesCopy codePreview
+Replaces `*ngFor`.
 
-```html
-@if (marks() >= 90) {
-  <p>Grade A</p>
-} @else if (marks() >= 75) {
-  <p>Grade B</p>
-} @else if (marks() >= 50) {
-  <p>Grade C</p>
-} @else {
-  <p>Fail</p>
-}
-```
+`track`
 
-### Intermediate-level questions
+Required in normal usage
 
-Q5. What are Angular Signals?
+Identifies collection items and helps minimize DOM operations.
 
-Signals are reactive values that notify Angular when their values change.
+`@empty`
 
-Example:
+Displays content when the collection is empty.
 
-typescript
+`signal()`
 
-```typescript
-count = signal(0);
+Stores reactive, writable state.
 
-increment() {
-  this.count.update(value => value + 1);
-}
-```
+`computed()`
 
-Read a signal using `count()`.
+Creates derived reactive state.
 
-Q6. How do you toggle an element in Angular?
+`$index`, `$first`, `$last`
 
-typescript
+Provide iteration context.
 
-```typescript
-show = signal(false);
+`$even`, `$odd`
 
-toggle() {
-  this.show.update(value => !value);
-}
-```
+Help implement alternating row styles.
 
-HTMLWrap linesCopy codePreview
+`.set()` and `.update()`
 
-```html
-<button (click)="toggle()">Toggle</button>
+Update signal values.
 
-@if (show()) {
-  <p>Hello Angular!</p>
-}
-```
 
-Q7. What is the difference between `@if` and `@switch`?
 
-- `@if` is useful for evaluating boolean expressions and complex conditions.
-- `@switch` is useful for matching one expression against multiple possible values.
+## 15. Official Angular documentation
 
-Example:
+For deeper learning, these are the most useful references:
 
-HTMLWrap linesCopy codePreview
+- [Angular Control Flow – @for documentation](<https://angular.dev/guide/templates/control-flow?utm_source=chatgpt.com>).
+- [Angular Signals – Official Guide](<https://angular.dev/guide/signals?utm_source=chatgpt.com>).
+- [Angular Expression Syntax](<https://v21.angular.dev/guide/templates/expression-syntax?utm_source=chatgpt.com>).
+- [Announcing Angular 21 – Official Release Blog](<https://blog.angular.dev/announcing-angular-v21-57946c34f14b?utm_source=chatgpt.com>).
 
-```html
-@switch (role()) {
-  @case ('admin') {
-    <p>Admin Dashboard</p>
-  }
-  @case ('user') {
-    <p>User Dashboard</p>
-  }
-  @default {
-    <p>Guest Dashboard</p>
-  }
-}
-```
+## Final recommendation
 
-Q8. What is `$event` in Angular?
+If you're preparing for Angular 21 interviews or building enterprise Angular applications, remember these five rules:
 
-`$event` is a special template variable that provides the event object generated by a DOM event.
+1. Prefer `@for` over `*ngFor`.
+2. Prefer `track item.id` over `track $index` for dynamic collections.
+3. Use `signal()` for reactive collections.
+4. Use `.update()` and immutable array operations to modify signal arrays.
+5. Use `computed()` for derived data such as searching, filtering, and sorting.
 
-HTMLWrap linesCopy codePreview
-
-```html
-<button (click)="handleClick($event)">
-  Click
-</button>
-```
-
-Q9. What is the difference between `.set()` and `.update()` in Signals?
-
-| `.set()` | `.update()` |
-| --- | --- |
-| Assigns a new value | Calculates a new value |
-| Takes the new value | Receives the previous value |
-| `count.set(10)` | `count.update(v => v + 1)` |
-
-### Advanced-level questions
-
-Q10. What happens internally when a Signal changes inside an `@if` condition?
-
-1. Angular tracks the signal read by the template.
-2. The signal value changes.
-3. Angular is notified about the change.
-4. Angular updates the affected template.
-5. The appropriate conditional view is rendered or removed.
-
-Q11. Does `@if` hide an element or remove it from the DOM?
-
-It removes the conditional view from the DOM when the condition is false. It can be recreated when the condition becomes true.
-
-Q12. Can we use Signals with API responses?
-
-Yes. Signals can store API loading states and response data.
-
-For example:
+The most important combination to master is:
 
 typescript
 
 ```typescript
-loading = signal(false);
-users = signal<string[]>([]);
-error = signal('');
+users = signal<User[]>([]);
 
-loadUsers() {
-  this.loading.set(true);
-
-  // API request goes here
-}
-```
-
-You can use `@if` to display loading, success and error messages.
-
-Q13. What is `computed()` in Angular?
-
-`computed()` creates a read-only derived signal based on other signals.
-
-typescript
-
-```typescript
-price = signal(100);
-quantity = signal(2);
-
-total = computed(() =>
-  this.price() * this.quantity()
+activeUsers = computed(() =>
+  this.users().filter(user => user.active)
 );
 ```
 
 HTMLWrap linesCopy codePreview
 
 ```html
-<p>Total: {{ total() }}</p>
+@for (user of activeUsers(); track user.id) {
+  <div>{{ user.name }}</div>
+} @empty {
+  <p>No active users found.</p>
+}
 ```
 
-Q14. What is the difference between `@if` and `[hidden]`?
-
-- `@if`: Adds or removes the conditional view from the DOM.
-- `[hidden]`: Keeps the element in the DOM but applies the HTML hidden state.
-
-Q15. Do we need to import CommonModule for `@if` in Angular 21?
-
-No. Built-in control flow syntax does not require `CommonModule`.
-
-## 11. Practice Exercises
-
-Try these five exercises to strengthen your understanding.
-
-Angular practice checklist
-
-0/5 completed
-
-[ ]Exercise 1: Create a button that shows and hides a paragraph.
-
-Create a boolean signal, toggle it using .update(), and use @if.
-
-[ ]Exercise 2: Create a login/logout application.
-
-Use a login status signal and @if/@else.
-
-[ ]Exercise 3: Create a dropdown with India, USA and UK options.
-
-Use a select element, change event and multiple @else if conditions.
-
-[ ]Exercise 4: Display Loading, Success and Error messages.
-
-Use a union type signal and @switch or @if/@else if.
-
-[ ]Exercise 5: Calculate total price dynamically.
-
-Use price and quantity signals with a computed() signal.
-
-## 12. Important Angular 21 Documentation
-
-For further learning, refer to the official Angular documentation:
-
-1. [Angular Control Flow – @if, @else, @switch and @for](<https://angular.dev/guide/templates/control-flow?utm_source=chatgpt.com>).
-2. [Angular Event Binding](<https://angular.dev/guide/templates/event-binding?utm_source=chatgpt.com>).
-3. [Angular 21 Template Expression Syntax](<https://v21.angular.dev/guide/templates/expression-syntax?utm_source=chatgpt.com>).
-4. [NgIf API and Deprecation Information](<https://angular.dev/api/common/NgIf?utm_source=chatgpt.com>).
-
-## Final Revision: What You Must Remember
-
-| Concept | Angular syntax |
-| --- | --- |
-| Conditional rendering | `@if` |
-| Alternative condition | `@else` |
-| Multiple conditions | `@else if` |
-| Multiple fixed values | `@switch` |
-| Individual switch condition | `@case` |
-| Default switch condition | `@default` |
-| Reactive state | `signal()` |
-| Update signal | `.set()` / `.update()` |
-| Derived state | `computed()` |
-| Button click | `(click)` |
-| Dropdown change | `(change)` |
-| Input change | `(input)` |
-| Hide visually | `[hidden]` |
-
-My recommendation: Learn `@if`, `@else if`, `@switch`, Signals and event binding together. These concepts form the foundation for building interactive Angular applications, handling API responses, and answering practical Angular interview questions.
+This is a clean and maintainable pattern for modern Angular development.

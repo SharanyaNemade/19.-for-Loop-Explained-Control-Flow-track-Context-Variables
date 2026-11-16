@@ -1,25 +1,25 @@
 import { Component, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-
+import { ControlFlow } from './control-flow/control-flow';
 
 @Component({
-  imports: [RouterOutlet],
+  imports: [RouterOutlet,ControlFlow],
   selector: 'app-root',
   standalone: true,
   styleUrl: './app.css',
   templateUrl: './app.html',
 })
 export class App {
-  isLogin = signal(false);
-  show = signal(true)
-  status = signal('error')
+  // isLogin = signal(false);
+  // show = signal(true)
+  // status = signal('error')
 
-  handleLogin(status:boolean){
-    this.isLogin.set(status)
-  }
+  // handleLogin(status:boolean){
+  //   this.isLogin.set(status)
+  // }
 
-  handleStatus(event : Event){
-    let target =  event.target as HTMLSelectElement;
-    this.status.set(target.value)
-  }
+  // handleStatus(event : Event){
+  //   let target =  event.target as HTMLSelectElement;
+  //   this.status.set(target.value)
+  // }
 }
